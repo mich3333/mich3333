@@ -26,3 +26,4 @@ autonomous-claude/**/*.db-journal
 # OS
 .DS_Store
 Thumbs.db
+*.tar.gz
