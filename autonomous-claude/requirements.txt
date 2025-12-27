@@ -19,3 +19,6 @@ sentence-transformers>=2.2.0
 # Optional: Additional utilities
 # requests>=2.31.0
 # beautifulsoup4>=4.12.0
+
+# ChatGPT Integration
+openai>=1.0.0
