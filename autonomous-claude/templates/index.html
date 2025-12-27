@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Autonomous Claude - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🤖 Autonomous Claude</h1>
+            <p class="subtitle">מערכת AI אוטונומית עם זיכרון ו-ChatGPT</p>
+            <div class="status-badge" id="statusBadge">
+                <span class="status-dot"></span>
+                <span class="status-text">טוען...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Column: Controls -->
+            <div class="column controls-column">
+                <!-- System Status -->
+                <div class="card">
+                    <h2>📊 מצב המערכת</h2>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">מחזורים</div>
+                            <div class="stat-value" id="iterationCount">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">זיכרונות</div>
+                            <div class="stat-value" id="memoryCount">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">ChatGPT</div>
+                            <div class="stat-value" id="brainStatus">❌</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Qdrant</div>
+                            <div class="stat-value" id="qdrantStatus">❌</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goal Control -->
+                <div class="card">
+                    <h2>🎯 הגדרת מטרה</h2>
+                    <textarea
+                        id="goalInput"
+                        placeholder="הכנס מטרה לסוכן... לדוגמה: לחקור GitHub ולמצוא repositories מעניינים"
+                        rows="3"
+                    ></textarea>
+                    <button id="setGoalBtn" class="btn btn-primary">הגדר מטרה</button>
+                    <div id="currentGoal" class="current-goal"></div>
+                </div>
+
+                <!-- Agent Control -->
+                <div class="card">
+                    <h2>⚡ בקרת סוכן</h2>
+                    <div class="button-group">
+                        <button id="startAgentBtn" class="btn btn-success">▶️ התחל</button>
+                        <button id="stopAgentBtn" class="btn btn-danger" disabled>⏹️ עצור</button>
+                    </div>
+                    <div id="agentStatus" class="agent-status"></div>
+                </div>
+
+                <!-- ChatGPT Controls -->
+                <div class="card">
+                    <h2>🧠 ChatGPT מוח</h2>
+                    <textarea
+                        id="chatgptInput"
+                        placeholder="שאל את ChatGPT משהו..."
+                        rows="2"
+                    ></textarea>
+                    <button id="chatgptThinkBtn" class="btn btn-primary">💭 תן ל-ChatGPT לחשוב</button>
+                    <div id="chatgptResponse" class="chatgpt-response"></div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <h2>🔧 פעולות מהירות</h2>
+                    <div class="button-group-vertical">
+                        <button id="refreshBtn" class="btn btn-secondary">🔄 רענן נתונים</button>
+                        <button id="clearMemoryBtn" class="btn btn-warning">🗑️ נקה זיכרון</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Data Display -->
+            <div class="column data-column">
+                <!-- Recent Memories -->
+                <div class="card memories-card">
+                    <div class="card-header">
+                        <h2>💾 זיכרונות אחרונים</h2>
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-type="all">הכל</button>
+                            <button class="filter-btn" data-type="goal">מטרות</button>
+                            <button class="filter-btn" data-type="thought">מחשבות</button>
+                            <button class="filter-btn" data-type="action">פעולות</button>
+                            <button class="filter-btn" data-type="observation">תצפיות</button>
+                        </div>
+                    </div>
+                    <div id="memoriesList" class="memories-list">
+                        <div class="loading">טוען זיכרונות...</div>
+                    </div>
+                </div>
+
+                <!-- Last Decision -->
+                <div class="card">
+                    <h2>💡 החלטה אחרונה</h2>
+                    <div id="lastDecision" class="last-decision">
+                        אין החלטות עדיין
+                    </div>
+                </div>
+
+                <!-- Memory Stats -->
+                <div class="card">
+                    <h2>📈 סטטיסטיקות זיכרון</h2>
+                    <div id="memoryStats" class="memory-stats">
+                        <div class="loading">טוען סטטיסטיקות...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

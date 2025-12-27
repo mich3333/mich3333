@@ -1,10 +1,14 @@
-run = "python3 autonomous-claude/autonomous_agent.py"
+run = "cd autonomous-claude && python3 web_app.py"
 language = "python3"
-entrypoint = "autonomous-claude/autonomous_agent.py"
+entrypoint = "autonomous-claude/web_app.py"
 
 [nix]
 channel = "stable-22_11"
 
 [deployment]
-run = ["python3", "autonomous-claude/autonomous_agent.py"]
+run = ["sh", "-c", "cd autonomous-claude && python3 web_app.py"]
 deploymentTarget = "cloudrun"
+
+[env]
+FLASK_APP = "autonomous-claude/web_app.py"
+FLASK_ENV = "development"
