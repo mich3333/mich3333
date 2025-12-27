@@ -49,6 +49,12 @@ def initialize_brain():
 
 @app.route('/')
 def index():
+    """Portfolio landing page."""
+    return render_template('portfolio.html')
+
+
+@app.route('/dashboard')
+def dashboard():
     """Main dashboard page."""
     return render_template('index.html')
 
