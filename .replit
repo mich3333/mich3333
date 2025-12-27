@@ -1,0 +1,10 @@
+run = "python3 autonomous-claude/autonomous_agent.py"
+language = "python3"
+entrypoint = "autonomous-claude/autonomous_agent.py"
+
+[nix]
+channel = "stable-22_11"
+
+[deployment]
+run = ["python3", "autonomous-claude/autonomous_agent.py"]
+deploymentTarget = "cloudrun"
