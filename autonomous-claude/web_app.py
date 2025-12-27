@@ -307,6 +307,47 @@ def clear_database():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/figma/import', methods=['POST'])
+def import_figma():
+    """Import design from Figma."""
+    data = request.json
+    if not data or 'file_key' not in data:
+        return jsonify({'error': 'Figma file_key required'}), 400
+
+    try:
+        from figma_integration import FigmaClient
+
+        # Get token from env or request
+        token = data.get('token') or os.getenv('FIGMA_TOKEN')
+        if not token:
+            return jsonify({'error': 'FIGMA_TOKEN not set'}), 400
+
+        client = FigmaClient(token=token)
+        file_data = client.get_file(data['file_key'])
+
+        # Extract design data
+        colors = client.extract_colors(file_data)
+        text_styles = client.extract_text_styles(file_data)
+        components = client.extract_components(file_data)
+
+        # Generate code
+        tailwind_config = client.generate_tailwind_config(file_data)
+        css_variables = client.generate_css_variables(file_data)
+
+        return jsonify({
+            'success': True,
+            'file_name': file_data.get('name'),
+            'colors': colors[:10],
+            'text_styles': text_styles[:10],
+            'components': len(components),
+            'tailwind_config': tailwind_config,
+            'css_variables': css_variables
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     print("=" * 70)
     print("🤖 Autonomous Claude - Web Interface")
