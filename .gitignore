@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Autonomous Claude data (don't commit runtime data)
+autonomous-claude/data/
+autonomous-claude/**/*.db
+autonomous-claude/**/*.db-journal
+
+# Screenshots (optional - uncomment to exclude)
+# autonomous-claude/data/screenshots/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

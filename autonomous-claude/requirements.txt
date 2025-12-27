@@ -1,0 +1,21 @@
+# Autonomous Claude Dependencies
+
+# Core dependencies (always required)
+# sqlite3 is built into Python standard library
+
+# Long-term memory (Qdrant vector database)
+qdrant-client>=1.7.0
+
+# Embeddings for semantic search
+sentence-transformers>=2.2.0
+
+# Optional: Browser automation
+# Uncomment the ones you need:
+
+# playwright>=1.40.0
+# pyppeteer>=1.0.2
+# selenium>=4.15.0
+
+# Optional: Additional utilities
+# requests>=2.31.0
+# beautifulsoup4>=4.12.0
