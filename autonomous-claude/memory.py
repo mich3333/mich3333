@@ -56,8 +56,8 @@ class ShortTermMemory:
         memories = [dict(row) for row in cursor.fetchall()]
         conn.close()
 
-        # Return in chronological order (oldest first)
-        return list(reversed(memories))
+        # Return in reverse chronological order (newest first)
+        return memories
 
     def get_by_type(self, memory_type: str, limit: int = 10) -> List[Dict]:
         """Get recent memories of a specific type."""
@@ -76,7 +76,8 @@ class ShortTermMemory:
         memories = [dict(row) for row in cursor.fetchall()]
         conn.close()
 
-        return list(reversed(memories))
+        # Return in reverse chronological order (newest first)
+        return memories
 
     def clear(self) -> None:
         """Clear all memories (use with caution)."""

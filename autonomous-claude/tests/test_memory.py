@@ -13,13 +13,52 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from memory import ShortTermMemory, LongTermMemory
 
 
+def init_test_db(db_path):
+    """Initialize test database with schema."""
+    conn = sqlite3.connect(str(db_path))
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS memories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            type TEXT NOT NULL CHECK(type IN ('action', 'observation', 'thought', 'goal')),
+            content TEXT NOT NULL
+        )
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_timestamp ON memories(timestamp DESC)
+    """)
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_type_id ON memories(type, id DESC)
+    """)
+
+    cursor.execute("""
+        CREATE TRIGGER IF NOT EXISTS maintain_recent_memories
+        AFTER INSERT ON memories
+        BEGIN
+            DELETE FROM memories
+            WHERE id NOT IN (
+                SELECT id FROM memories
+                ORDER BY id DESC
+                LIMIT 50
+            );
+        END
+    """)
+
+    conn.commit()
+    conn.close()
+
+
 class TestShortTermMemory:
     """Test suite for ShortTermMemory."""
 
     @pytest.fixture
     def memory(self, tmp_path):
-        """Create a temporary memory instance."""
+        """Create a temporary memory instance with initialized database."""
         db_path = tmp_path / "test_memory.db"
+        init_test_db(db_path)
         return ShortTermMemory(db_path=str(db_path))
 
     def test_add_memory(self, memory):
@@ -93,19 +132,19 @@ class TestLongTermMemory:
     def test_add_memory(self, ltm):
         """Test adding to long-term memory."""
         # Should not crash even if Qdrant not available
-        ltm.add('Test knowledge', {'source': 'test'})
+        ltm.add('Test knowledge', 'observation', tags=['test'])
 
     def test_query_memory(self, ltm):
         """Test querying long-term memory."""
         # Should return empty list if Qdrant not available
-        results = ltm.query('test query')
+        results = ltm.search('test query')
         assert isinstance(results, list)
 
     def test_graceful_degradation(self, ltm):
         """Test that system works without Qdrant."""
         # Should not raise errors
-        ltm.add('Test')
-        results = ltm.query('Test')
+        ltm.add('Test', 'thought')
+        results = ltm.search('Test')
         assert results == []  # Empty if Qdrant unavailable
 
 
@@ -116,6 +155,7 @@ class TestMemoryIntegration:
         """Test complete memory workflow."""
         # Create memory
         db_path = tmp_path / "workflow_test.db"
+        init_test_db(db_path)
         stm = ShortTermMemory(db_path=str(db_path))
 
         # Add a goal
@@ -143,6 +183,7 @@ class TestMemoryIntegration:
     def test_concurrent_access(self, tmp_path):
         """Test multiple memory instances."""
         db_path = tmp_path / "concurrent_test.db"
+        init_test_db(db_path)
 
         mem1 = ShortTermMemory(db_path=str(db_path))
         mem2 = ShortTermMemory(db_path=str(db_path))
