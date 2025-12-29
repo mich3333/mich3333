@@ -8,14 +8,14 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](#testing)
 
-An intelligent autonomous agent powered by ChatGPT, featuring a dual-memory system, real-time decision-making capabilities, and a beautiful modern web interface built with TypeScript and Tailwind CSS.
+An intelligent autonomous agent powered by Claude AI, featuring a dual-memory system, real-time decision-making capabilities, and a beautiful modern web interface built with TypeScript and Tailwind CSS.
 
 ---
 
 ## ✨ Features
 
 ### 🧠 AI & Intelligence
-- **ChatGPT Integration** - Powered by OpenAI GPT-3.5/4 for intelligent decision-making
+- **Claude AI Integration** - Powered by Anthropic Claude for intelligent decision-making
 - **Autonomous Agent** - Self-directed AI that can set and achieve goals
 - **Decision Loop Framework** - READ → QUERY → THINK → ACT → RECORD → LEARN cycle
 - **Learning System** - Learns from experience and improves over time
