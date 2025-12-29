@@ -59,6 +59,12 @@ def dashboard():
     return render_template('index.html')
 
 
+@app.route('/showcase')
+def showcase():
+    """Showcase page - what we built."""
+    return render_template('showcase.html')
+
+
 @app.route('/api/status')
 def get_status():
     """Get current agent status."""
