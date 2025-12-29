@@ -1,0 +1,16 @@
+# Test Dependencies Only - Fast CI/CD
+# Excludes heavy ML packages (sentence-transformers, qdrant-client)
+# for faster GitHub Actions builds
+
+# ChatGPT Integration
+openai>=1.0.0
+
+# Web Interface
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+Flask-Compress>=1.14
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+requests>=2.31.0
