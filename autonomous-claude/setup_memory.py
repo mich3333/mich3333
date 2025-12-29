@@ -29,9 +29,14 @@ def setup_short_term_memory():
         )
     """)
 
-    # Create index on timestamp for faster queries
+    # Create indexes for faster queries
     cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_timestamp ON memories(timestamp DESC)
+    """)
+
+    # Index on type for get_by_type queries
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_type_id ON memories(type, id DESC)
     """)
 
     # Create trigger to maintain last 50 entries

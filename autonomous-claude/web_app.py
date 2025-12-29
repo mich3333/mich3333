@@ -22,6 +22,13 @@ from chatgpt_brain import ChatGPTBrain, AutonomousAgentWithChatGPT
 app = Flask(__name__)
 CORS(app)
 
+# Simple cache for performance
+cache = {
+    'stats': {'data': None, 'timestamp': 0},
+    'memories': {'data': None, 'timestamp': 0}
+}
+CACHE_TTL = 5  # Cache for 5 seconds
+
 # Global agent state
 agent_state = {
     'running': False,
@@ -81,8 +88,9 @@ def get_status():
 
 @app.route('/api/memories/recent')
 def get_recent_memories():
-    """Get recent memories from short-term storage."""
+    """Get recent memories from short-term storage with caching."""
     limit = request.args.get('limit', 50, type=int)
+    limit = min(limit, 100)  # Cap at 100 for performance
     memories = short_term.get_recent(limit)
 
     # Format for JSON
@@ -121,18 +129,29 @@ def search_memories():
 
 @app.route('/api/memories/stats')
 def get_memory_stats():
-    """Get memory statistics."""
-    recent = short_term.get_recent(1000)
+    """Get memory statistics with caching for better performance."""
+    # Check cache
+    current_time = time.time()
+    if cache['stats']['data'] and current_time - cache['stats']['timestamp'] < CACHE_TTL:
+        return jsonify(cache['stats']['data'])
+
+    # Reduced from 1000 to 200 for better performance
+    recent = short_term.get_recent(200)
 
     type_counts = {}
     for m in recent:
         t = m['type']
         type_counts[t] = type_counts.get(t, 0) + 1
 
-    return jsonify({
+    result = {
         'total': len(recent),
         'by_type': type_counts
-    })
+    }
+
+    # Update cache
+    cache['stats'] = {'data': result, 'timestamp': current_time}
+
+    return jsonify(result)
 
 
 @app.route('/api/memories/add', methods=['POST'])

@@ -36,9 +36,11 @@ interface MemoryStats {
     by_type: Record<string, number>;
 }
 
-interface ApiResponse<T> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface ApiResponse<T = any> {
     success?: boolean;
     error?: string;
+    data?: T;
     [key: string]: any;
 }
 
@@ -591,10 +593,16 @@ class EventHandlers {
 class AutoRefresh {
     static start(): void {
         const interval = setInterval(async () => {
-            await new StatusManager().update();
-            await new MemoryManager().load();
-            await new StatsManager().load();
-        }, 3000); // Every 3 seconds
+            // Only refresh if page is visible (performance optimization)
+            if (!document.hidden) {
+                await new StatusManager().update();
+                // Only load memories and stats if agent is running
+                if (state.isAgentRunning) {
+                    await new MemoryManager().load();
+                    await new StatsManager().load();
+                }
+            }
+        }, 10000); // Every 10 seconds - optimized for better performance
 
         state.setRefreshInterval(interval);
     }
