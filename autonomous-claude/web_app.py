@@ -6,6 +6,7 @@ Autonomous Claude - Web Interface
 """
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
+from flask_compress import Compress
 import os
 import sys
 import json
@@ -21,6 +22,15 @@ from chatgpt_brain import ChatGPTBrain, AutonomousAgentWithChatGPT
 
 app = Flask(__name__)
 CORS(app)
+Compress(app)  # Enable Gzip compression - reduces file sizes by 70%+
+
+# Configure compression
+app.config['COMPRESS_MIMETYPES'] = [
+    'text/html', 'text/css', 'text/xml',
+    'application/json', 'application/javascript'
+]
+app.config['COMPRESS_LEVEL'] = 6  # Balance between speed and compression
+app.config['COMPRESS_MIN_SIZE'] = 500  # Only compress files > 500 bytes
 
 # Simple cache for performance
 cache = {
