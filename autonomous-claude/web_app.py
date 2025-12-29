@@ -372,5 +372,9 @@ if __name__ == '__main__':
     print(f"🌐 Starting web server...")
     print()
 
+    # Get port from environment (for Railway, Heroku, etc.)
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_ENV') == 'development'
+
     # Run server
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=debug)
