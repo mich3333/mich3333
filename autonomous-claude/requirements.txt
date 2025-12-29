@@ -26,3 +26,8 @@ openai>=1.0.0
 # Web Interface
 Flask>=3.0.0
 Flask-CORS>=4.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+requests>=2.31.0
