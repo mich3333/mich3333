@@ -79,14 +79,14 @@ class ApiClient {
     async stopAgent() {
         return this.call('/api/agent/stop', 'POST');
     }
-    async chatgptThink(situation, context = {}) {
-        return this.call('/api/chatgpt/think', 'POST', { situation, context });
+    async claudeThink(situation, context = {}) {
+        return this.call('/api/claude/think', 'POST', { situation, context });
     }
-    async chatgptAnalyze(goal, observations) {
-        return this.call('/api/chatgpt/analyze', 'POST', { goal, observations });
+    async claudeAnalyze(goal, observations) {
+        return this.call('/api/claude/analyze', 'POST', { goal, observations });
     }
-    async chatgptLearn(experience, outcome) {
-        return this.call('/api/chatgpt/learn', 'POST', { experience, outcome });
+    async claudeLearn(experience, outcome) {
+        return this.call('/api/claude/learn', 'POST', { experience, outcome });
     }
     async clearDatabase() {
         return this.call('/api/database/clear', 'POST');
@@ -424,27 +424,27 @@ class EventHandlers {
             ToastManager.show('שגיאה בעצירת הסוכן', 'error');
         }
     }
-    static async chatgptThink() {
-        const input = document.getElementById('chatgptInput');
+    static async claudeThink() {
+        const input = document.getElementById('claudeInput');
         if (!input)
             return;
         const situation = input.value.trim();
         if (!situation) {
-            ToastManager.show('נא להכניס שאלה ל-ChatGPT', 'error');
+            ToastManager.show('נא להכניס שאלה ל-Claude', 'error');
             return;
         }
-        const responseDiv = document.getElementById('chatgptResponse');
+        const responseDiv = document.getElementById('claudeResponse');
         if (responseDiv) {
-            responseDiv.textContent = '🤔 ChatGPT חושב...';
+            responseDiv.textContent = '🤔 Claude חושב...';
             responseDiv.classList.add('active');
         }
         try {
-            const result = await api.chatgptThink(situation, {});
+            const result = await api.claudeThink(situation, {});
             if (responseDiv) {
                 responseDiv.textContent = `💡 ${result.decision}`;
             }
             input.value = '';
-            ToastManager.show('ChatGPT השיב!', 'success');
+            ToastManager.show('Claude השיב!', 'success');
             // Refresh memories
             await new MemoryManager().load();
         }
@@ -453,7 +453,7 @@ class EventHandlers {
             if (responseDiv) {
                 responseDiv.textContent = `❌ שגיאה: ${message}`;
             }
-            ToastManager.show('שגיאה בקבלת תשובה מ-ChatGPT', 'error');
+            ToastManager.show('שגיאה בקבלת תשובה מ-Claude', 'error');
         }
     }
     static async refreshAll() {
@@ -522,9 +522,9 @@ function initializeEventListeners() {
     startAgentBtn?.addEventListener('click', () => EventHandlers.startAgent());
     const stopAgentBtn = document.getElementById('stopAgentBtn');
     stopAgentBtn?.addEventListener('click', () => EventHandlers.stopAgent());
-    // ChatGPT
-    const chatgptThinkBtn = document.getElementById('chatgptThinkBtn');
-    chatgptThinkBtn?.addEventListener('click', () => EventHandlers.chatgptThink());
+    // Claude
+    const claudeThinkBtn = document.getElementById('claudeThinkBtn');
+    claudeThinkBtn?.addEventListener('click', () => EventHandlers.claudeThink());
     // Quick actions
     const refreshBtn = document.getElementById('refreshBtn');
     refreshBtn?.addEventListener('click', () => EventHandlers.refreshAll());
@@ -547,10 +547,10 @@ function initializeEventListeners() {
             EventHandlers.setGoal();
         }
     });
-    const chatgptInput = document.getElementById('chatgptInput');
-    chatgptInput?.addEventListener('keypress', (e) => {
+    const claudeInput = document.getElementById('claudeInput');
+    claudeInput?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && e.ctrlKey) {
-            EventHandlers.chatgptThink();
+            EventHandlers.claudeThink();
         }
     });
 }

@@ -18,7 +18,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from memory import short_term, long_term
-from chatgpt_brain import ChatGPTBrain, AutonomousAgentWithChatGPT
+from claude_brain import ClaudeBrain, AutonomousAgentWithClaude
 
 app = Flask(__name__)
 CORS(app)
@@ -50,14 +50,14 @@ agent_state = {
 }
 
 def initialize_brain():
-    """Initialize ChatGPT Brain if API key is available."""
-    api_key = os.getenv('OPENAI_API_KEY')
+    """Initialize Claude Brain if API key is available."""
+    api_key = os.getenv('ANTHROPIC_API_KEY')
     if api_key and not agent_state['brain']:
         try:
-            agent_state['brain'] = ChatGPTBrain(api_key=api_key, model="gpt-3.5-turbo")
+            agent_state['brain'] = ClaudeBrain(api_key=api_key, model="claude-opus-4-5-20251101")
             return True
         except Exception as e:
-            print(f"Failed to initialize ChatGPT Brain: {e}")
+            print(f"Failed to initialize Claude Brain: {e}")
             return False
     return agent_state['brain'] is not None
 
@@ -91,7 +91,7 @@ def get_status():
         'iteration': agent_state['iteration'],
         'last_decision': agent_state['last_decision'],
         'brain_available': agent_state['brain'] is not None,
-        'openai_key_set': os.getenv('OPENAI_API_KEY') is not None,
+        'anthropic_key_set': os.getenv('ANTHROPIC_API_KEY') is not None,
         'qdrant_available': long_term.qdrant_available
     })
 
@@ -202,7 +202,7 @@ def start_agent():
 
     # Initialize brain if needed
     if not initialize_brain():
-        return jsonify({'error': 'ChatGPT Brain not available. Set OPENAI_API_KEY.'}), 500
+        return jsonify({'error': 'Claude Brain not available. Set ANTHROPIC_API_KEY.'}), 500
 
     agent_state['running'] = True
     agent_state['iteration'] = 0
@@ -210,7 +210,7 @@ def start_agent():
     # Start agent in background thread
     def run_agent():
         try:
-            agent = AutonomousAgentWithChatGPT(model="gpt-3.5-turbo")
+            agent = AutonomousAgentWithClaude(model="claude-opus-4-5-20251101")
             agent.set_goal(agent_state['current_goal'])
             agent_state['agent'] = agent
 
@@ -238,16 +238,16 @@ def stop_agent():
     return jsonify({'success': True})
 
 
-@app.route('/api/chatgpt/think', methods=['POST'])
-def chatgpt_think():
-    """Ask ChatGPT to think about a situation."""
+@app.route('/api/claude/think', methods=['POST'])
+def claude_think():
+    """Ask Claude to think about a situation."""
     data = request.json
     if not data or 'situation' not in data:
         return jsonify({'error': 'Situation required'}), 400
 
     # Initialize brain if needed
     if not initialize_brain():
-        return jsonify({'error': 'ChatGPT Brain not available. Set OPENAI_API_KEY.'}), 500
+        return jsonify({'error': 'Claude Brain not available. Set ANTHROPIC_API_KEY.'}), 500
 
     try:
         context = data.get('context', {})
@@ -268,16 +268,16 @@ def chatgpt_think():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/chatgpt/analyze', methods=['POST'])
-def chatgpt_analyze():
-    """Ask ChatGPT to analyze and decide."""
+@app.route('/api/claude/analyze', methods=['POST'])
+def claude_analyze():
+    """Ask Claude to analyze and decide."""
     data = request.json
     if not data or 'goal' not in data or 'observations' not in data:
         return jsonify({'error': 'Goal and observations required'}), 400
 
     # Initialize brain if needed
     if not initialize_brain():
-        return jsonify({'error': 'ChatGPT Brain not available. Set OPENAI_API_KEY.'}), 500
+        return jsonify({'error': 'Claude Brain not available. Set ANTHROPIC_API_KEY.'}), 500
 
     try:
         analysis = agent_state['brain'].analyze_and_decide(
@@ -300,16 +300,16 @@ def chatgpt_analyze():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/chatgpt/learn', methods=['POST'])
-def chatgpt_learn():
-    """Ask ChatGPT to learn from experience."""
+@app.route('/api/claude/learn', methods=['POST'])
+def claude_learn():
+    """Ask Claude to learn from experience."""
     data = request.json
     if not data or 'experience' not in data or 'outcome' not in data:
         return jsonify({'error': 'Experience and outcome required'}), 400
 
     # Initialize brain if needed
     if not initialize_brain():
-        return jsonify({'error': 'ChatGPT Brain not available. Set OPENAI_API_KEY.'}), 500
+        return jsonify({'error': 'Claude Brain not available. Set ANTHROPIC_API_KEY.'}), 500
 
     try:
         lesson = agent_state['brain'].learn_from_experience(
@@ -390,12 +390,12 @@ if __name__ == '__main__':
     print()
 
     # Check API key
-    if os.getenv('OPENAI_API_KEY'):
-        print("✅ OPENAI_API_KEY found")
+    if os.getenv('ANTHROPIC_API_KEY'):
+        print("✅ ANTHROPIC_API_KEY found")
         initialize_brain()
     else:
-        print("⚠️  OPENAI_API_KEY not set - ChatGPT features will be unavailable")
-        print("   Set it with: export OPENAI_API_KEY='your-key'")
+        print("⚠️  ANTHROPIC_API_KEY not set - Claude features will be unavailable")
+        print("   Set it with: export ANTHROPIC_API_KEY='your-key'")
 
     print()
     print(f"🌐 Starting web server...")

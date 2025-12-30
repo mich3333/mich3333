@@ -148,16 +148,16 @@ class ApiClient {
         return this.call('/api/agent/stop', 'POST');
     }
 
-    async chatgptThink(situation: string, context: any = {}): Promise<ApiResponse<{ decision: string }>> {
-        return this.call('/api/chatgpt/think', 'POST', { situation, context });
+    async claudeThink(situation: string, context: any = {}): Promise<ApiResponse<{ decision: string }>> {
+        return this.call('/api/claude/think', 'POST', { situation, context });
     }
 
-    async chatgptAnalyze(goal: string, observations: string[]): Promise<ApiResponse<{ analysis: any }>> {
-        return this.call('/api/chatgpt/analyze', 'POST', { goal, observations });
+    async claudeAnalyze(goal: string, observations: string[]): Promise<ApiResponse<{ analysis: any }>> {
+        return this.call('/api/claude/analyze', 'POST', { goal, observations });
     }
 
-    async chatgptLearn(experience: string, outcome: string): Promise<ApiResponse<{ lesson: string }>> {
-        return this.call('/api/chatgpt/learn', 'POST', { experience, outcome });
+    async claudeLearn(experience: string, outcome: string): Promise<ApiResponse<{ lesson: string }>> {
+        return this.call('/api/claude/learn', 'POST', { experience, outcome });
     }
 
     async clearDatabase(): Promise<ApiResponse<{ message: string }>> {
@@ -549,31 +549,31 @@ class EventHandlers {
         }
     }
 
-    static async chatgptThink(): Promise<void> {
-        const input = document.getElementById('chatgptInput') as HTMLTextAreaElement;
+    static async claudeThink(): Promise<void> {
+        const input = document.getElementById('claudeInput') as HTMLTextAreaElement;
         if (!input) return;
 
         const situation = input.value.trim();
 
         if (!situation) {
-            ToastManager.show('נא להכניס שאלה ל-ChatGPT', 'error');
+            ToastManager.show('נא להכניס שאלה ל-Claude', 'error');
             return;
         }
 
-        const responseDiv = document.getElementById('chatgptResponse');
+        const responseDiv = document.getElementById('claudeResponse');
         if (responseDiv) {
-            responseDiv.textContent = '🤔 ChatGPT חושב...';
+            responseDiv.textContent = '🤔 Claude חושב...';
             responseDiv.classList.add('active');
         }
 
         try {
-            const result = await api.chatgptThink(situation, {});
+            const result = await api.claudeThink(situation, {});
 
             if (responseDiv) {
                 responseDiv.textContent = `💡 ${result.decision}`;
             }
             input.value = '';
-            ToastManager.show('ChatGPT השיב!', 'success');
+            ToastManager.show('Claude השיב!', 'success');
 
             // Refresh memories
             await new MemoryManager().load();
@@ -583,7 +583,7 @@ class EventHandlers {
             if (responseDiv) {
                 responseDiv.textContent = `❌ שגיאה: ${message}`;
             }
-            ToastManager.show('שגיאה בקבלת תשובה מ-ChatGPT', 'error');
+            ToastManager.show('שגיאה בקבלת תשובה מ-Claude', 'error');
         }
     }
 
@@ -667,9 +667,9 @@ function initializeEventListeners(): void {
     const stopAgentBtn = document.getElementById('stopAgentBtn');
     stopAgentBtn?.addEventListener('click', () => EventHandlers.stopAgent());
 
-    // ChatGPT
-    const chatgptThinkBtn = document.getElementById('chatgptThinkBtn');
-    chatgptThinkBtn?.addEventListener('click', () => EventHandlers.chatgptThink());
+    // Claude
+    const claudeThinkBtn = document.getElementById('claudeThinkBtn');
+    claudeThinkBtn?.addEventListener('click', () => EventHandlers.claudeThink());
 
     // Quick actions
     const refreshBtn = document.getElementById('refreshBtn');
@@ -697,10 +697,10 @@ function initializeEventListeners(): void {
         }
     });
 
-    const chatgptInput = document.getElementById('chatgptInput');
-    chatgptInput?.addEventListener('keypress', (e) => {
+    const claudeInput = document.getElementById('claudeInput');
+    claudeInput?.addEventListener('keypress', (e) => {
         if ((e as KeyboardEvent).key === 'Enter' && (e as KeyboardEvent).ctrlKey) {
-            EventHandlers.chatgptThink();
+            EventHandlers.claudeThink();
         }
     });
 }

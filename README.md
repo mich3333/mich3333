@@ -47,7 +47,7 @@ An intelligent autonomous agent powered by Claude AI, featuring a dual-memory sy
 ### Prerequisites
 - Python 3.11+
 - Node.js 18+ (for TypeScript)
-- OpenAI API Key
+- Anthropic API Key (Claude Opus 4.5)
 
 ### Installation
 
@@ -61,7 +61,7 @@ cd autonomous-claude
 pip install -r requirements.txt
 
 # Set up environment variables
-export OPENAI_API_KEY='your-openai-api-key'
+export ANTHROPIC_API_KEY='your-anthropic-api-key'
 export FIGMA_TOKEN='your-figma-token'  # Optional
 
 # Run the application
@@ -84,7 +84,7 @@ python3 web_app.py
 ```
 autonomous-claude/
 ├── autonomous_agent.py      # Main autonomous agent (261 lines)
-├── chatgpt_brain.py         # ChatGPT integration (331 lines)
+├── claude_brain.py          # Claude Opus 4.5 integration (332 lines)
 ├── memory.py                # Memory system (266 lines)
 ├── decision_loop.py         # Decision framework (202 lines)
 ├── browser.py               # Browser automation (233 lines)

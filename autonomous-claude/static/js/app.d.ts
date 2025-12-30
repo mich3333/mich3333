@@ -61,13 +61,13 @@ declare class ApiClient {
     }>>;
     startAgent(): Promise<ApiResponse<{}>>;
     stopAgent(): Promise<ApiResponse<{}>>;
-    chatgptThink(situation: string, context?: any): Promise<ApiResponse<{
+    claudeThink(situation: string, context?: any): Promise<ApiResponse<{
         decision: string;
     }>>;
-    chatgptAnalyze(goal: string, observations: string[]): Promise<ApiResponse<{
+    claudeAnalyze(goal: string, observations: string[]): Promise<ApiResponse<{
         analysis: any;
     }>>;
-    chatgptLearn(experience: string, outcome: string): Promise<ApiResponse<{
+    claudeLearn(experience: string, outcome: string): Promise<ApiResponse<{
         lesson: string;
     }>>;
     clearDatabase(): Promise<ApiResponse<{
@@ -108,7 +108,7 @@ declare class EventHandlers {
     static setGoal(): Promise<void>;
     static startAgent(): Promise<void>;
     static stopAgent(): Promise<void>;
-    static chatgptThink(): Promise<void>;
+    static claudeThink(): Promise<void>;
     static refreshAll(): Promise<void>;
     static clearMemory(): Promise<void>;
     static setFilter(type: string): void;
