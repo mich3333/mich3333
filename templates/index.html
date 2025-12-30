@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Multi-Agent System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🤖 Multi-Agent System</h1>
+            <p class="subtitle">Multiple AI agents working together to solve complex tasks</p>
+            <div class="status-badge" id="statusBadge">
+                <span class="status-dot"></span>
+                <span class="status-text">Loading...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Column: Input & Agents -->
+            <div class="column">
+                <!-- Task Input -->
+                <div class="card">
+                    <h2>📝 Your Task</h2>
+                    <textarea
+                        id="taskInput"
+                        placeholder="Enter a complex task... For example:&#10;&#10;'Build a REST API for a todo app with authentication, database, tests, and documentation'&#10;&#10;or&#10;&#10;'Create a Python script that analyzes stock data and generates a report'"
+                        rows="6"
+                    ></textarea>
+                    <button id="executeBtn" class="btn btn-primary">
+                        <span id="btnText">🚀 Execute Task</span>
+                        <span id="btnLoader" class="loader" style="display: none;"></span>
+                    </button>
+                </div>
+
+                <!-- Agents Status -->
+                <div class="card">
+                    <h2>👥 Agent Team</h2>
+                    <div id="agentsGrid" class="agents-grid">
+                        <!-- Agents will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Execution & Results -->
+            <div class="column">
+                <!-- Live Execution Log -->
+                <div class="card execution-card">
+                    <h2>⚡ Live Execution</h2>
+                    <div id="executionLog" class="execution-log">
+                        <div class="empty-state">
+                            No task running. Enter a task and click Execute!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div class="card results-card">
+                    <h2>📊 Results</h2>
+                    <div id="results" class="results">
+                        <div class="empty-state">
+                            Results will appear here after execution
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
