@@ -90,6 +90,7 @@ declare class MemoryManager {
     private createMemoryItem;
     private updateElement;
     private escapeHtml;
+    private formatTimestamp;
 }
 declare class StatsManager {
     load(): Promise<void>;
@@ -97,6 +98,7 @@ declare class StatsManager {
 }
 declare class DecisionDisplay {
     static update(decision: LastDecision): void;
+    private static formatTimestamp;
     private static escapeHtml;
 }
 declare class AgentControls {

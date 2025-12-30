@@ -312,7 +312,7 @@ class MemoryManager {
         };
 
         const icon = icons[memory.type] || '•';
-        const timestamp = new Date(memory.timestamp).toLocaleString('he-IL');
+        const timestamp = this.formatTimestamp(memory.timestamp);
 
         div.innerHTML = `
             <div class="memory-header">
@@ -336,6 +336,26 @@ class MemoryManager {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    private formatTimestamp(timestamp: string): string {
+        try {
+            const date = new Date(timestamp);
+            // Check if date is valid
+            if (isNaN(date.getTime())) {
+                return timestamp; // Return original if invalid
+            }
+            return date.toLocaleString('he-IL', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            console.error('Date parsing error:', error);
+            return timestamp; // Fallback to original timestamp
+        }
     }
 }
 
@@ -395,22 +415,43 @@ class DecisionDisplay {
         const decisionDiv = document.getElementById('lastDecision');
         if (!decisionDiv) return;
 
+        const formattedTime = this.formatTimestamp(decision.timestamp);
+
         if (decision.decision) {
             decisionDiv.innerHTML = `
                 <div style="margin-bottom: 8px; color: var(--text-secondary); font-size: 0.9em;">
-                    ${new Date(decision.timestamp).toLocaleString('he-IL')}
+                    ${formattedTime}
                 </div>
                 <div>${this.escapeHtml(decision.decision)}</div>
             `;
         } else if (decision.analysis) {
             decisionDiv.innerHTML = `
                 <div style="margin-bottom: 8px; color: var(--text-secondary); font-size: 0.9em;">
-                    ${new Date(decision.timestamp).toLocaleString('he-IL')}
+                    ${formattedTime}
                 </div>
                 <div><strong>פעולה:</strong> ${this.escapeHtml(decision.analysis.action)}</div>
                 <div style="margin-top: 8px;"><strong>נימוק:</strong> ${this.escapeHtml(decision.analysis.reasoning)}</div>
                 <div style="margin-top: 8px;"><strong>עדיפות:</strong> ${decision.analysis.priority}</div>
             `;
+        }
+    }
+
+    private static formatTimestamp(timestamp: string): string {
+        try {
+            const date = new Date(timestamp);
+            if (isNaN(date.getTime())) {
+                return timestamp;
+            }
+            return date.toLocaleString('he-IL', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            console.error('Date parsing error:', error);
+            return timestamp;
         }
     }
 
