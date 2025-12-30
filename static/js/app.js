@@ -1,13 +1,17 @@
-// Multi-Agent System - Frontend JavaScript
+// Multi-Agent System - Frontend with WebSockets Real-Time Streaming
 
 class MultiAgentUI {
     constructor() {
         this.apiBase = '';
         this.executing = false;
+        this.socket = null;
         this.init();
     }
 
     async init() {
+        // Initialize Socket.IO
+        this.initWebSocket();
+
         // Load agents
         await this.loadAgents();
 
@@ -25,6 +29,61 @@ class MultiAgentUI {
         });
     }
 
+    initWebSocket() {
+        // Connect to Socket.IO server
+        this.socket = io();
+
+        // Connection events
+        this.socket.on('connect', () => {
+            console.log('✅ WebSocket connected');
+            this.updateConnectionStatus(true);
+        });
+
+        this.socket.on('disconnect', () => {
+            console.log('❌ WebSocket disconnected');
+            this.updateConnectionStatus(false);
+        });
+
+        // Real-time execution events
+        this.socket.on('execution_start', (data) => {
+            console.log('🚀 Execution started:', data.task);
+            this.clearExecutionLog();
+            this.clearResults();
+        });
+
+        this.socket.on('agent_update', (data) => {
+            console.log(`🤖 ${data.agent}: ${data.status}`);
+            this.addLogEntry(data.agent, data.status, data.message);
+            this.highlightAgent(data.agent, data.status === 'working');
+        });
+
+        this.socket.on('execution_complete', (data) => {
+            console.log('✅ Execution complete');
+            this.displayResults(data);
+            this.setExecuting(false);
+        });
+
+        this.socket.on('error', (data) => {
+            console.error('❌ Error:', data.message);
+            this.showError(data.message);
+            this.setExecuting(false);
+        });
+    }
+
+    updateConnectionStatus(connected) {
+        const badge = document.getElementById('statusBadge');
+        const dot = badge.querySelector('.status-dot');
+        const text = badge.querySelector('.status-text');
+
+        if (connected) {
+            dot.classList.remove('offline');
+            text.textContent = 'Online - WebSocket Connected';
+        } else {
+            dot.classList.add('offline');
+            text.textContent = 'Disconnected';
+        }
+    }
+
     async checkStatus() {
         try {
             const response = await fetch(`${this.apiBase}/api/status`);
@@ -36,18 +95,13 @@ class MultiAgentUI {
 
             if (data.status === 'online' && data.anthropic_key_set) {
                 dot.classList.remove('offline');
-                text.textContent = 'Online - Ready';
+                text.textContent = 'Online - Ready (WebSocket)';
             } else {
                 dot.classList.add('offline');
                 text.textContent = data.anthropic_key_set ? 'Offline' : 'API Key Missing';
             }
         } catch (error) {
             console.error('Status check failed:', error);
-            const badge = document.getElementById('statusBadge');
-            const dot = badge.querySelector('.status-dot');
-            const text = badge.querySelector('.status-text');
-            dot.classList.add('offline');
-            text.textContent = 'Offline';
         }
     }
 
@@ -69,7 +123,7 @@ class MultiAgentUI {
         }
     }
 
-    async executeTask() {
+    executeTask() {
         if (this.executing) return;
 
         const taskInput = document.getElementById('taskInput');
@@ -83,34 +137,8 @@ class MultiAgentUI {
         this.executing = true;
         this.setExecuting(true);
 
-        // Clear previous results
-        this.clearExecutionLog();
-        this.clearResults();
-
-        try {
-            const response = await fetch(`${this.apiBase}/api/execute`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ task })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.displayResults(data);
-                this.displayExecutionLog(data.execution_log);
-            } else {
-                this.showError(data.error || 'Execution failed');
-            }
-        } catch (error) {
-            console.error('Execution error:', error);
-            this.showError(`Error: ${error.message}`);
-        } finally {
-            this.executing = false;
-            this.setExecuting(false);
-        }
+        // Execute via WebSocket for real-time updates
+        this.socket.emit('execute_realtime', { task: task });
     }
 
     setExecuting(executing) {
@@ -121,49 +149,47 @@ class MultiAgentUI {
         btn.disabled = executing;
 
         if (executing) {
-            btnText.style.display = 'none';
+            btnText.textContent = '⚡ Executing (Real-time)...';
             btnLoader.style.display = 'inline-block';
         } else {
-            btnText.style.display = 'inline';
+            btnText.textContent = '🚀 Execute Task';
             btnLoader.style.display = 'none';
         }
     }
 
     clearExecutionLog() {
         const log = document.getElementById('executionLog');
-        log.innerHTML = '<div class="empty-state">Executing task...</div>';
+        log.innerHTML = '<div class="empty-state">⚡ Executing with real-time streaming...</div>';
     }
 
     clearResults() {
         const results = document.getElementById('results');
-        results.innerHTML = '<div class="empty-state">Processing...</div>';
+        results.innerHTML = '<div class="empty-state">⚡ Processing...</div>';
     }
 
-    displayExecutionLog(logEntries) {
+    addLogEntry(agent, status, message) {
         const log = document.getElementById('executionLog');
-        log.innerHTML = '';
 
-        logEntries.forEach((entry, index) => {
-            setTimeout(() => {
-                const logEntry = document.createElement('div');
-                logEntry.className = `log-entry ${entry.agent}`;
-                logEntry.innerHTML = `
-                    <div class="log-header">
-                        <span>${this.getAgentEmoji(entry.agent)}</span>
-                        <span>${entry.agent.charAt(0).toUpperCase() + entry.agent.slice(1)}</span>
-                        <span class="log-status ${entry.status}">${entry.status}</span>
-                    </div>
-                    <div class="log-message">${this.truncateMessage(entry.message, 500)}</div>
-                `;
-                log.appendChild(logEntry);
+        // Remove empty state if present
+        const emptyState = log.querySelector('.empty-state');
+        if (emptyState) {
+            emptyState.remove();
+        }
 
-                // Highlight active agent
-                this.highlightAgent(entry.agent, entry.status === 'working');
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry ${agent}`;
+        logEntry.innerHTML = `
+            <div class="log-header">
+                <span>${this.getAgentEmoji(agent)}</span>
+                <span>${agent.charAt(0).toUpperCase() + agent.slice(1)}</span>
+                <span class="log-status ${status}">${status}</span>
+            </div>
+            <div class="log-message">${this.truncateMessage(message, 500)}</div>
+        `;
+        log.appendChild(logEntry);
 
-                // Scroll to bottom
-                log.scrollTop = log.scrollHeight;
-            }, index * 100);
-        });
+        // Scroll to bottom
+        log.scrollTop = log.scrollHeight;
     }
 
     displayResults(data) {
@@ -179,25 +205,17 @@ class MultiAgentUI {
         `;
         results.appendChild(reportSection);
 
-        // Subtask Results (optional, collapsed)
-        if (data.subtask_results && Object.keys(data.subtask_results).length > 0) {
-            const subtasksSection = document.createElement('div');
-            subtasksSection.className = 'result-section';
-            subtasksSection.innerHTML = `
-                <h3>🔍 Detailed Agent Results</h3>
+        // Execution log from result
+        if (data.result && data.result.execution_log) {
+            const logSection = document.createElement('div');
+            logSection.className = 'result-section';
+            logSection.innerHTML = `
+                <h3>📝 Execution Summary</h3>
+                <div class="result-content">
+                    ${data.result.execution_log.length} steps completed
+                </div>
             `;
-
-            for (const [agent, result] of Object.entries(data.subtask_results)) {
-                const agentResult = document.createElement('div');
-                agentResult.className = 'result-section';
-                agentResult.innerHTML = `
-                    <h4>${this.getAgentEmoji(agent)} ${agent.charAt(0).toUpperCase() + agent.slice(1)}</h4>
-                    <div class="result-content">${this.truncateMessage(result, 1000)}</div>
-                `;
-                subtasksSection.appendChild(agentResult);
-            }
-
-            results.appendChild(subtasksSection);
+            results.appendChild(logSection);
         }
     }
 

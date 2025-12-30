@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-Multi-Agent System - Flask Web Application
+Multi-Agent System - Flask Web Application with WebSockets
 """
 import os
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 from orchestrator import MultiAgentOrchestrator
 
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Initialize orchestrator
 orchestrator = None
@@ -125,6 +127,69 @@ def reset():
         return jsonify({'error': str(e)}), 500
 
 
+# WebSocket events for real-time streaming
+@socketio.on('connect')
+def handle_connect():
+    """Handle client connection."""
+    print('🔌 Client connected')
+    emit('status', {'message': 'Connected to Multi-Agent System'})
+
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    """Handle client disconnection."""
+    print('🔌 Client disconnected')
+
+
+@socketio.on('execute_realtime')
+def handle_realtime_execution(data):
+    """Execute task with real-time updates via WebSocket."""
+    try:
+        user_task = data.get('task', '')
+        if not user_task:
+            emit('error', {'message': 'No task provided'})
+            return
+
+        # Get orchestrator
+        orch = get_orchestrator()
+
+        # Emit start event
+        emit('execution_start', {'task': user_task})
+
+        # Execute with custom callback for real-time updates
+        def emit_progress(agent, status, message):
+            socketio.emit('agent_update', {
+                'agent': agent,
+                'status': status,
+                'message': message
+            })
+
+        # Monkey-patch the orchestrator's log function for this execution
+        original_log = orch._log
+        def realtime_log(agent, status, message):
+            original_log(agent, status, message)
+            emit_progress(agent, status, message)
+
+        orch._log = realtime_log
+
+        try:
+            # Execute the task
+            result = orch.execute_task(user_task)
+
+            # Emit completion
+            emit('execution_complete', {
+                'result': result,
+                'final_report': result.get('final_report', '')
+            })
+
+        finally:
+            # Restore original log function
+            orch._log = original_log
+
+    except Exception as e:
+        emit('error', {'message': str(e)})
+
+
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     debug = os.getenv('FLASK_ENV') == 'development'
@@ -132,12 +197,14 @@ if __name__ == '__main__':
     print(f"""
     ╔══════════════════════════════════════════╗
     ║   🤖 Multi-Agent System Starting...     ║
+    ║   ⚡ WebSockets Enabled!                ║
     ╚══════════════════════════════════════════╝
 
     📍 Server: http://localhost:{port}
     🔑 API Key: {'✅ Set' if os.getenv('ANTHROPIC_API_KEY') else '❌ Not Set'}
     🎯 Agents: Manager, Researcher, Coder, Reviewer, Reporter
+    ⚡ Real-time: WebSockets streaming enabled
 
     """)
 
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    socketio.run(app, host='0.0.0.0', port=port, debug=debug, allow_unsafe_werkzeug=True)
