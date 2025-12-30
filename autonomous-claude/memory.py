@@ -5,11 +5,47 @@ Handles both short-term (SQLite) and long-term (Qdrant) memory.
 """
 import sqlite3
 import json
+import os
 from datetime import datetime
 from typing import List, Dict, Optional
 import uuid
 
-SHORT_TERM_DB = "/autonomous-claude/data/memory/short_term.db"
+# Flexible database path configuration
+def get_db_path():
+    """Get database path with fallback options for different environments."""
+    # Option 1: Environment variable (highest priority)
+    if 'MEMORY_DB_PATH' in os.environ:
+        return os.environ['MEMORY_DB_PATH']
+
+    # Option 2: Relative path (good for local dev)
+    relative_path = os.path.join(os.getcwd(), 'data', 'memory', 'short_term.db')
+    relative_dir = os.path.dirname(relative_path)
+    try:
+        os.makedirs(relative_dir, exist_ok=True)
+        # Test if we can write to this location
+        test_file = os.path.join(relative_dir, '.write_test')
+        with open(test_file, 'w') as f:
+            f.write('test')
+        os.remove(test_file)
+        return relative_path
+    except (OSError, PermissionError):
+        pass
+
+    # Option 3: /tmp directory (works on most Unix systems including Render)
+    tmp_path = '/tmp/autonomous_claude_memory.db'
+    try:
+        # Test if /tmp is writable
+        with open(tmp_path, 'a') as f:
+            pass
+        return tmp_path
+    except (OSError, PermissionError):
+        pass
+
+    # Option 4: In-memory database (last resort)
+    print("⚠ Warning: Using in-memory database. Data will be lost on restart.")
+    return ':memory:'
+
+SHORT_TERM_DB = get_db_path()
 LONG_TERM_COLLECTION = "claude_memory"
 QDRANT_HOST = "localhost"
 QDRANT_PORT = 6333
@@ -20,6 +56,7 @@ class ShortTermMemory:
 
     def __init__(self, db_path: str = SHORT_TERM_DB):
         self.db_path = db_path
+        self._ensure_schema()
 
     def add(self, memory_type: str, content: str) -> int:
         """Add a memory entry. Returns the entry ID."""
@@ -86,6 +123,50 @@ class ShortTermMemory:
         cursor.execute("DELETE FROM memories")
         conn.commit()
         conn.close()
+
+    def _ensure_schema(self) -> None:
+        """Ensure database schema exists, create if it doesn't."""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+
+            # Create memories table if it doesn't exist
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS memories (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT NOT NULL,
+                    type TEXT NOT NULL CHECK(type IN ('action', 'observation', 'thought', 'goal')),
+                    content TEXT NOT NULL
+                )
+            """)
+
+            # Create indexes for faster queries
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_timestamp ON memories(timestamp DESC)
+            """)
+
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_type_id ON memories(type, id DESC)
+            """)
+
+            # Create trigger to maintain last 50 entries
+            cursor.execute("""
+                CREATE TRIGGER IF NOT EXISTS maintain_recent_memories
+                AFTER INSERT ON memories
+                BEGIN
+                    DELETE FROM memories
+                    WHERE id NOT IN (
+                        SELECT id FROM memories
+                        ORDER BY id DESC
+                        LIMIT 50
+                    );
+                END
+            """)
+
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"⚠ Warning: Could not initialize database schema: {e}")
 
 
 class LongTermMemory:

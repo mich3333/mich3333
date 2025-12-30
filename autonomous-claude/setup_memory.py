@@ -6,14 +6,19 @@ Sets up SQLite short-term memory database.
 import sqlite3
 import os
 from datetime import datetime
+from memory import get_db_path
 
-DB_PATH = "/autonomous-claude/data/memory/short_term.db"
+DB_PATH = get_db_path()
 
 def setup_short_term_memory():
     """Create SQLite database with schema for short-term memory."""
 
-    # Ensure directory exists
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    # Ensure directory exists (if not using :memory:)
+    if DB_PATH != ':memory:':
+        try:
+            os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+        except (OSError, PermissionError) as e:
+            print(f"⚠ Warning: Could not create directory for database: {e}")
 
     # Connect to database (creates if doesn't exist)
     conn = sqlite3.connect(DB_PATH)
