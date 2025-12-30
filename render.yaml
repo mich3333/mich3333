@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: multi-agent-system
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: FLASK_ENV
+        value: production
+      - key: PORT
+        value: 10000
