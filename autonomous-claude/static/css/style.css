@@ -283,8 +283,8 @@ textarea:focus {
     display: block;
 }
 
-/* ChatGPT Response */
-.chatgpt-response {
+/* Claude Response */
+.claude-response {
     margin-top: 12px;
     padding: 12px;
     background: rgba(168, 85, 247, 0.1);
@@ -295,7 +295,7 @@ textarea:focus {
     overflow-y: auto;
 }
 
-.chatgpt-response.active {
+.claude-response.active {
     display: block;
 }
 

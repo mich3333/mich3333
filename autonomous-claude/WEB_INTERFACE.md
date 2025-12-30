@@ -11,7 +11,7 @@
 ✅ **עיצוב מודרני** - ממשק יפה וקל לשימוש
 ✅ **עדכונים בזמן אמת** - רענון אוטומטי כל 3 שניות
 ✅ **בקרת סוכן** - התחל/עצור את הסוכן בלחיצה
-✅ **שליטה על ChatGPT** - שאל שאלות ישירות ל-ChatGPT
+✅ **שליטה על Claude AI** - שאל שאלות ישירות ל-Claude AI
 ✅ **ניהול זיכרון** - צפייה, סינון וניהול זיכרונות
 ✅ **סטטיסטיקות** - גרפים ונתונים על הזיכרון
 
@@ -43,7 +43,7 @@ tsc
 ### 3. הגדר API Key
 
 ```bash
-export OPENAI_API_KEY='sk-your-key-here'
+export ANTHROPIC_API_KEY='sk-your-key-here'
 ```
 
 ### 4. הרץ את השרת!
@@ -68,7 +68,7 @@ python3 web_app.py
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  🤖 Autonomous Claude                          [⚫ פעיל]    │
-│  מערכת AI אוטונומית עם זיכרון ו-ChatGPT                    │
+│  מערכת AI אוטונומית עם זיכרון ו-Claude AI                    │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  ┌──────────────┐  ┌────────────────────────────────────┐  │
@@ -76,8 +76,8 @@ python3 web_app.py
 │  │              │  │                                    │  │
 │  │ מחזורים: 15  │  │ [הכל] [מטרות] [מחשבות] [פעולות] │  │
 │  │ זיכרונות: 142│  │                                    │  │
-│  │ ChatGPT: ✅  │  │ 🎯 [goal] למצוא repositories...   │  │
-│  │ Qdrant: ❌   │  │ 💭 [thought] ChatGPT החליט...     │  │
+│  │ Claude AI: ✅  │  │ 🎯 [goal] למצוא repositories...   │  │
+│  │ Qdrant: ❌   │  │ 💭 [thought] Claude AI החליט...     │  │
 │  └──────────────┘  │ ⚡ [action] מבצע חיפוש...         │  │
 │                    │ 👁️ [observation] מצאתי 10...      │  │
 │  ┌──────────────┐  └────────────────────────────────────┘  │
@@ -97,7 +97,7 @@ python3 web_app.py
 │  └──────────────┘  │ 💭 מחשבות     45 (31.7%)         │  │
 │                    │ ⚡ פעולות      38 (26.8%)         │  │
 │  ┌──────────────┐  │ 👁️ תצפיות     47 (33.1%)         │  │
-│  │ 🧠 ChatGPT   │  └────────────────────────────────────┘  │
+│  │ 🧠 Claude AI   │  └────────────────────────────────────┘  │
 │  │              │                                          │
 │  │ [_________]  │                                          │
 │  │              │                                          │
@@ -128,11 +128,11 @@ python3 web_app.py
 3. הסוכן יתחיל לרוץ במחזורים אוטונומיים
 4. לחץ "⏹️ עצור" כדי לעצור
 
-### שימוש ב-ChatGPT ישירות
+### שימוש ב-Claude AI ישירות
 
-1. הכנס שאלה בשדה ChatGPT
-2. לחץ "💭 תן ל-ChatGPT לחשוב" או Ctrl+Enter
-3. ChatGPT ישיב ותראה את התשובה
+1. הכנס שאלה בשדה Claude AI
+2. לחץ "💭 תן ל-Claude AI לחשוב" או Ctrl+Enter
+3. Claude AI ישיב ותראה את התשובה
 
 דוגמה:
 ```
@@ -158,7 +158,7 @@ python3 web_app.py
 ```bash
 GET /api/status
 ```
-מחזיר מצב הסוכן, מחזורים, ו-ChatGPT status
+מחזיר מצב הסוכן, מחזורים, ו-Claude AI status
 
 ### Memories
 ```bash
@@ -175,11 +175,11 @@ POST /api/agent/start
 POST /api/agent/stop
 ```
 
-### ChatGPT
+### Claude AI
 ```bash
-POST /api/chatgpt/think
-POST /api/chatgpt/analyze
-POST /api/chatgpt/learn
+POST /api/claude/think
+POST /api/claude/analyze
+POST /api/claude/learn
 ```
 
 ### Database
@@ -199,7 +199,7 @@ POST /api/database/clear
 
 ### Keyboard Shortcuts
 - `Ctrl + Enter` בשדה מטרה - הגדרת מטרה
-- `Ctrl + Enter` בשדה ChatGPT - שליחת שאלה
+- `Ctrl + Enter` בשדה Claude AI - שליחת שאלה
 
 ### Toast Notifications
 התראות מתקפלות עבור:
@@ -294,16 +294,16 @@ lsof -i :5000
 kill -9 <PID>
 ```
 
-### ❌ ChatGPT לא עובד
+### ❌ Claude AI לא עובד
 
 ודא ש-API key מוגדר:
 ```bash
-echo $OPENAI_API_KEY
+echo $ANTHROPIC_API_KEY
 ```
 
 אם ריק:
 ```bash
-export OPENAI_API_KEY='sk-...'
+export ANTHROPIC_API_KEY='sk-...'
 ```
 
 ### ❌ TypeScript errors
@@ -334,7 +334,7 @@ pip install -r requirements.txt
 ### Local Development
 ```bash
 cd autonomous-claude
-export OPENAI_API_KEY='your-key'
+export ANTHROPIC_API_KEY='your-key'
 python3 web_app.py
 ```
 
@@ -358,11 +358,11 @@ gunicorn -w 4 -b 0.0.0.0:5000 web_app:app
 1. הגדר מטרה: `"לחקור repositories פופולריים ב-Python"`
 2. התחל סוכן
 3. צפה בזיכרונות כשהסוכן עובד
-4. ראה את ההחלטות של ChatGPT
+4. ראה את ההחלטות של Claude AI
 
-### דוגמה 2: שאילת ChatGPT
+### דוגמה 2: שאילת Claude AI
 
-1. בשדה ChatGPT הכנס: `"מה הדרך הטובה ביותר לארגן קוד Python?"`
+1. בשדה Claude AI הכנס: `"מה הדרך הטובה ביותר לארגן קוד Python?"`
 2. לחץ "חשוב"
 3. קרא את התשובה
 
@@ -398,7 +398,7 @@ gunicorn -w 4 -b 0.0.0.0:5000 web_app:app
 - זיכרון ארוך טווח (Qdrant - אופציונלי)
 - Auto-cleanup אוטומטי
 
-### ChatGPT Integration
+### Claude AI Integration
 - Decision making
 - Analysis & planning
 - Learning from experience

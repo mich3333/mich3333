@@ -15,7 +15,7 @@ interface AgentStatus {
     iteration: number;
     last_decision: LastDecision | null;
     brain_available: boolean;
-    openai_key_set: boolean;
+    anthropic_key_set: boolean;
     qdrant_available: boolean;
 }
 
