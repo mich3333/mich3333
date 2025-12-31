@@ -27,6 +27,7 @@ autonomous-claude/**/*.db-journal
 .DS_Store
 Thumbs.db
 *.tar.gz
+*.zip
 
 # Multi-Agent System (separate git repo)
 multi-agent-system/
