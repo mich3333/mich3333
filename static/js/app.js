@@ -111,11 +111,23 @@ class MultiAgentUI {
             const data = await response.json();
 
             const grid = document.getElementById('agentsGrid');
+            const agentColors = {
+                'manager': 'from-amber-500 to-orange-500',
+                'researcher': 'from-blue-500 to-cyan-500',
+                'coder': 'from-green-500 to-emerald-500',
+                'reviewer': 'from-purple-500 to-violet-500',
+                'reporter': 'from-pink-500 to-rose-500'
+            };
+
             grid.innerHTML = data.agents.map(agent => `
-                <div class="agent-card" data-agent="${agent.name.toLowerCase()}">
-                    <div class="agent-emoji">${agent.emoji}</div>
-                    <div class="agent-name">${agent.name}</div>
-                    <div class="agent-role">${agent.role}</div>
+                <div class="agent-card glass p-4 rounded-xl border-2 border-white/10 hover:border-${agent.name.toLowerCase() === 'manager' ? 'orange' : agent.name.toLowerCase() === 'researcher' ? 'cyan' : agent.name.toLowerCase() === 'coder' ? 'emerald' : agent.name.toLowerCase() === 'reviewer' ? 'violet' : 'rose'}-500/50 transition-all duration-300 hover:scale-105 cursor-pointer group" data-agent="${agent.name.toLowerCase()}">
+                    <div class="text-center">
+                        <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-gradient-to-br ${agentColors[agent.name.toLowerCase()]} flex items-center justify-center text-2xl transform group-hover:scale-110 transition-transform">
+                            ${agent.emoji}
+                        </div>
+                        <div class="font-bold text-sm mb-1">${agent.name}</div>
+                        <div class="text-xs text-gray-400 leading-tight">${agent.role.split(' ').slice(0, 2).join(' ')}</div>
+                    </div>
                 </div>
             `).join('');
         } catch (error) {
@@ -171,20 +183,37 @@ class MultiAgentUI {
         const log = document.getElementById('executionLog');
 
         // Remove empty state if present
-        const emptyState = log.querySelector('.empty-state');
-        if (emptyState) {
+        const emptyState = log.querySelector('.text-center');
+        if (emptyState && emptyState.textContent.includes('No task running')) {
             emptyState.remove();
         }
 
+        const agentColors = {
+            'manager': 'border-orange-500/50 bg-orange-500/5',
+            'researcher': 'border-cyan-500/50 bg-cyan-500/5',
+            'coder': 'border-emerald-500/50 bg-emerald-500/5',
+            'reviewer': 'border-violet-500/50 bg-violet-500/5',
+            'reporter': 'border-rose-500/50 bg-rose-500/5'
+        };
+
+        const statusColors = {
+            'working': 'bg-yellow-500/20 text-yellow-300',
+            'completed': 'bg-green-500/20 text-green-300',
+            'analyzing': 'bg-blue-500/20 text-blue-300',
+            'error': 'bg-red-500/20 text-red-300'
+        };
+
         const logEntry = document.createElement('div');
-        logEntry.className = `log-entry ${agent}`;
+        logEntry.className = `glass p-4 rounded-xl border-l-4 ${agentColors[agent] || 'border-purple-500/50'} animate-slide-in-right`;
         logEntry.innerHTML = `
-            <div class="log-header">
-                <span>${this.getAgentEmoji(agent)}</span>
-                <span>${agent.charAt(0).toUpperCase() + agent.slice(1)}</span>
-                <span class="log-status ${status}">${status}</span>
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">${this.getAgentEmoji(agent)}</span>
+                    <span class="font-semibold capitalize">${agent}</span>
+                </div>
+                <span class="text-xs px-2 py-1 rounded-full ${statusColors[status] || 'bg-gray-500/20 text-gray-300'}">${status}</span>
             </div>
-            <div class="log-message">${this.truncateMessage(message, 500)}</div>
+            <div class="text-sm text-gray-300 leading-relaxed">${this.truncateMessage(message, 300)}</div>
         `;
         log.appendChild(logEntry);
 
@@ -223,10 +252,10 @@ class MultiAgentUI {
         const agentCard = document.querySelector(`[data-agent="${agentName}"]`);
         if (agentCard) {
             if (active) {
-                agentCard.classList.add('active');
+                agentCard.classList.add('ring-2', 'ring-purple-500', 'scale-110', 'neon-glow');
             } else {
                 setTimeout(() => {
-                    agentCard.classList.remove('active');
+                    agentCard.classList.remove('ring-2', 'ring-purple-500', 'scale-110', 'neon-glow');
                 }, 1000);
             }
         }

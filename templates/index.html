@@ -1,73 +1,209 @@
-<!DOCTYPE HTML>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 Multi-Agent System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>🤖 Multi-Agent AI System</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8b5cf6',
+                        secondary: '#ec4899',
+                    },
+                    animation: {
+                        'gradient': 'gradient 8s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3),
+                        0 0 40px rgba(139, 92, 246, 0.2);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: 200% 200%;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        .shimmer {
+            animation: shimmer 2s infinite;
+            background: linear-gradient(
+                to right,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.1) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            background-size: 1000px 100%;
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 min-h-screen text-white">
+
+    <!-- Animated Background Particles -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" style="top: 10%; left: 10%;"></div>
+        <div class="absolute w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-float" style="top: 60%; right: 10%; animation-delay: 2s;"></div>
+        <div class="absolute w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-float" style="bottom: 10%; left: 50%; animation-delay: 4s;"></div>
+    </div>
+
+    <div class="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
+
         <!-- Header -->
-        <header class="header">
-            <h1>🤖 Multi-Agent System</h1>
-            <p class="subtitle">Multiple AI agents working together to solve complex tasks</p>
-            <div class="status-badge" id="statusBadge">
-                <span class="status-dot"></span>
-                <span class="status-text">Loading...</span>
+        <header class="text-center mb-12 animate-fade-in">
+            <div class="inline-block mb-6">
+                <h1 class="text-6xl md:text-7xl font-black mb-4 bg-gradient-to-r from-purple-400 via-pink-500 to-purple-600 bg-clip-text text-transparent animate-gradient bg-[length:200%_200%]">
+                    🤖 Multi-Agent AI
+                </h1>
+                <div class="h-1 w-full bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+            </div>
+
+            <p class="text-xl md:text-2xl text-gray-300 mb-6 font-light">
+                Multiple specialized AI agents collaborating in <span class="text-purple-400 font-semibold">real-time</span>
+            </p>
+
+            <!-- Status Badge -->
+            <div id="statusBadge" class="inline-flex items-center gap-3 glass-strong px-6 py-3 rounded-full neon-glow">
+                <div class="relative">
+                    <span class="status-dot animate-ping absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75"></span>
+                    <span class="status-dot relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </div>
+                <span class="status-text text-sm font-medium">Loading...</span>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Left Column: Input & Agents -->
-            <div class="column">
-                <!-- Task Input -->
-                <div class="card">
-                    <h2>📝 Your Task</h2>
+        <!-- Main Content Grid -->
+        <div class="grid lg:grid-cols-2 gap-8">
+
+            <!-- Left Column -->
+            <div class="space-y-6">
+
+                <!-- Task Input Card -->
+                <div class="glass-strong rounded-2xl p-6 border-2 border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 transform hover:scale-[1.02]">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                            <span class="text-2xl">📝</span>
+                        </div>
+                        <h2 class="text-2xl font-bold">Your Task</h2>
+                    </div>
+
                     <textarea
                         id="taskInput"
-                        placeholder="Enter a complex task... For example:&#10;&#10;'Build a REST API for a todo app with authentication, database, tests, and documentation'&#10;&#10;or&#10;&#10;'Create a Python script that analyzes stock data and generates a report'"
                         rows="6"
+                        placeholder="Enter a complex task... For example:
+
+'Build a REST API for a todo app with authentication, database, tests, and documentation'
+
+or
+
+'Create a Python script that analyzes stock data and generates a report'"
+                        class="w-full bg-white/5 border-2 border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50 transition-all resize-none"
                     ></textarea>
-                    <button id="executeBtn" class="btn btn-primary">
-                        <span id="btnText">🚀 Execute Task</span>
-                        <span id="btnLoader" class="loader" style="display: none;"></span>
+
+                    <button id="executeBtn" class="w-full mt-4 group relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                        <div class="absolute inset-0 shimmer opacity-0 group-hover:opacity-100"></div>
+                        <span id="btnText" class="relative z-10">🚀 Execute Task</span>
+                        <span id="btnLoader" class="relative z-10 inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin ml-2" style="display: none;"></span>
                     </button>
                 </div>
 
-                <!-- Agents Status -->
-                <div class="card">
-                    <h2>👥 Agent Team</h2>
-                    <div id="agentsGrid" class="agents-grid">
+                <!-- Agent Team Card -->
+                <div class="glass-strong rounded-2xl p-6 border-2 border-purple-500/20">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                            <span class="text-2xl">👥</span>
+                        </div>
+                        <h2 class="text-2xl font-bold">Agent Team</h2>
+                    </div>
+
+                    <div id="agentsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <!-- Agents will be loaded here -->
                     </div>
                 </div>
+
             </div>
 
-            <!-- Right Column: Execution & Results -->
-            <div class="column">
-                <!-- Live Execution Log -->
-                <div class="card execution-card">
-                    <h2>⚡ Live Execution</h2>
-                    <div id="executionLog" class="execution-log">
-                        <div class="empty-state">
-                            No task running. Enter a task and click Execute!
+            <!-- Right Column -->
+            <div class="space-y-6">
+
+                <!-- Live Execution Card -->
+                <div class="glass-strong rounded-2xl p-6 border-2 border-purple-500/20 min-h-[400px]">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center animate-pulse-slow">
+                            <span class="text-2xl">⚡</span>
+                        </div>
+                        <h2 class="text-2xl font-bold">Live Execution</h2>
+                    </div>
+
+                    <div id="executionLog" class="space-y-3 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-purple-500/50 scrollbar-track-transparent">
+                        <div class="text-center py-20 text-gray-400">
+                            <div class="text-6xl mb-4">🚀</div>
+                            <p>No task running. Enter a task and click Execute!</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Results -->
-                <div class="card results-card">
-                    <h2>📊 Results</h2>
-                    <div id="results" class="results">
-                        <div class="empty-state">
-                            Results will appear here after execution
+                <!-- Results Card -->
+                <div class="glass-strong rounded-2xl p-6 border-2 border-purple-500/20">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                            <span class="text-2xl">📊</span>
+                        </div>
+                        <h2 class="text-2xl font-bold">Results</h2>
+                    </div>
+
+                    <div id="results" class="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500/50 scrollbar-track-transparent">
+                        <div class="text-center py-16 text-gray-400">
+                            <div class="text-5xl mb-4">📋</div>
+                            <p>Results will appear here after execution</p>
                         </div>
                     </div>
                 </div>
+
             </div>
+
         </div>
+
     </div>
 
     <!-- Socket.IO Client -->
