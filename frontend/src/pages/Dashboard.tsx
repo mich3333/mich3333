@@ -9,7 +9,9 @@ import { ResultsPanel } from '../components/ResultsPanel';
 import { StatsCard } from '../components/StatsCard';
 import { QuickActions } from '../components/QuickActions';
 import { RecentActivity } from '../components/RecentActivity';
-import { Skeleton } from '../components/ui/skeleton';
+import { LoadingAgents } from '../components/LoadingAgents';
+import { EmptyState } from '../components/EmptyState';
+import { Card } from '../components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { Button } from '../components/ui/button';
 import type { Agent } from '../types';
@@ -114,10 +116,27 @@ export const Dashboard = () => {
   }));
 
   return (
-    <div className="min-h-screen relative">
-      <FloatingParticles />
+    <div className="min-h-screen bg-bg">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* WebSocket Status Banner */}
+        {connectionState === 'error' && (
+          <Alert variant="error" className="mb-6">
+            <AlertTitle>Connection Error</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>{error || 'Failed to connect to server'}</span>
+              <Button onClick={reconnect} variant="outline" size="sm">
+                Reconnect
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
-      <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
+        {connectionState === 'connecting' && (
+          <Alert className="mb-6">
+            <AlertDescription>Connecting to server...</AlertDescription>
+          </Alert>
+        )}
+
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -126,24 +145,25 @@ export const Dashboard = () => {
         >
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
-              <div className="glass px-4 py-2 rounded-full border border-white/10">
-                <span className="text-sm text-gray-400">👤 {user?.email}</span>
-              </div>
+              <Card className="px-4 py-2">
+                <span className="text-sm text-text-muted">👤 {user?.email}</span>
+              </Card>
               <StatusBadge connected={connected} />
             </div>
-            <button
+            <Button
               onClick={handleLogout}
-              className="glass px-6 py-2 rounded-full hover:border-red-500/50 border border-white/10 transition-all text-sm"
+              variant="outline"
+              className="hover:border-error hover:text-error"
             >
               🚪 Logout
-            </button>
+            </Button>
           </div>
 
           <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-black mb-3 bg-gradient-to-r from-purple-400 via-pink-500 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-6xl font-black mb-3 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               🤖 AgentHub
             </h1>
-            <p className="text-lg text-gray-300">
+            <p className="text-lg text-text-muted">
               Your AI Team Orchestrator
             </p>
           </div>
@@ -156,28 +176,28 @@ export const Dashboard = () => {
           transition={{ delay: 0.2 }}
           className="flex justify-center mb-8"
         >
-          <div className="glass-strong rounded-full p-1 inline-flex gap-1">
+          <Card className="p-1 inline-flex gap-1">
             <button
               onClick={() => setView('overview')}
-              className={`px-6 py-2 rounded-full transition-all ${
+              className={`px-6 py-2 rounded-lg transition-all duration-200 ${
                 view === 'overview'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-primary text-white'
+                  : 'text-text-muted hover:text-text hover:bg-bg-subtle'
               }`}
             >
               📊 Overview
             </button>
             <button
               onClick={() => setView('agents')}
-              className={`px-6 py-2 rounded-full transition-all ${
+              className={`px-6 py-2 rounded-lg transition-all duration-200 ${
                 view === 'agents'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-primary text-white'
+                  : 'text-text-muted hover:text-text hover:bg-bg-subtle'
               }`}
             >
               🤖 Agents
             </button>
-          </div>
+          </Card>
         </motion.div>
 
         {view === 'overview' ? (
@@ -223,29 +243,55 @@ export const Dashboard = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="glass-strong rounded-xl p-6 border border-white/10"
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold flex items-center gap-2">
-                      <span>👥</span>
-                      <span>AI Agents</span>
-                    </h3>
-                    <button
-                      onClick={() => setView('agents')}
-                      className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
-                    >
-                      View all →
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    {agents.slice(0, 3).map((agent) => (
-                      <AgentCard
-                        key={agent.name}
-                        agent={agent}
-                        isActive={activeAgent === agent.name.toLowerCase()}
+                  <Card className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold flex items-center gap-2 text-text">
+                        <span>👥</span>
+                        <span>AI Agents</span>
+                      </h3>
+                      <button
+                        onClick={() => setView('agents')}
+                        className="text-sm text-primary hover:text-primary-hover transition-colors duration-200"
+                      >
+                        View all →
+                      </button>
+                    </div>
+
+                    {agentsLoading ? (
+                      <div className="grid grid-cols-3 gap-3">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="h-24 bg-bg-subtle animate-pulse rounded-lg" />
+                        ))}
+                      </div>
+                    ) : agentsError ? (
+                      <Alert variant="error">
+                        <AlertDescription className="flex items-center justify-between">
+                          <span>{agentsError}</span>
+                          <Button onClick={loadAgents} variant="outline" size="sm">
+                            Retry
+                          </Button>
+                        </AlertDescription>
+                      </Alert>
+                    ) : agents.length === 0 ? (
+                      <EmptyState
+                        icon="🤖"
+                        title="No Agents"
+                        description="No agents are currently available"
+                        action={{ label: "Retry", onClick: loadAgents }}
                       />
-                    ))}
-                  </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-3">
+                        {agents.slice(0, 3).map((agent) => (
+                          <AgentCard
+                            key={agent.name}
+                            agent={agent}
+                            isActive={activeAgent === agent.name.toLowerCase()}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </Card>
                 </motion.div>
               </div>
 
@@ -272,19 +318,41 @@ export const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-text">
                 <span>👥</span>
                 <span>AI Agents</span>
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {agents.map((agent) => (
-                  <AgentCard
-                    key={agent.name}
-                    agent={agent}
-                    isActive={activeAgent === agent.name.toLowerCase()}
-                  />
-                ))}
-              </div>
+
+              {agentsLoading ? (
+                <LoadingAgents />
+              ) : agentsError ? (
+                <Alert variant="error">
+                  <AlertTitle>Failed to Load Agents</AlertTitle>
+                  <AlertDescription className="flex items-center justify-between">
+                    <span>{agentsError}</span>
+                    <Button onClick={loadAgents} variant="outline" size="sm">
+                      Retry
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              ) : agents.length === 0 ? (
+                <EmptyState
+                  icon="🤖"
+                  title="No Agents Available"
+                  description="There are no agents currently configured in the system"
+                  action={{ label: "Retry Loading", onClick: loadAgents }}
+                />
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {agents.map((agent) => (
+                    <AgentCard
+                      key={agent.name}
+                      agent={agent}
+                      isActive={activeAgent === agent.name.toLowerCase()}
+                    />
+                  ))}
+                </div>
+              )}
             </motion.div>
 
             {/* Execution Log and Results */}
@@ -293,26 +361,28 @@ export const Dashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="glass-strong rounded-2xl p-6 border-2 border-purple-500/20"
               >
-                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <span>📝</span>
-                  <span>Execution Log</span>
-                </h2>
-                <LogViewer updates={agentUpdates} />
+                <Card className="p-6 border-l-4 border-primary">
+                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-text">
+                    <span>📝</span>
+                    <span>Execution Log</span>
+                  </h2>
+                  <LogViewer updates={agentUpdates} />
+                </Card>
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="glass-strong rounded-2xl p-6 border-2 border-purple-500/20"
+                transition={{ delay: 0.2 }}
               >
-                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <span>📊</span>
-                  <span>Results</span>
-                </h2>
-                <ResultsPanel result={result} />
+                <Card className="p-6 border-l-4 border-accent">
+                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-text">
+                    <span>📊</span>
+                    <span>Results</span>
+                  </h2>
+                  <ResultsPanel result={result} />
+                </Card>
               </motion.div>
             </div>
           </div>
@@ -322,8 +392,8 @@ export const Dashboard = () => {
         <motion.footer
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-center mt-12 text-gray-500 text-sm"
+          transition={{ delay: 0.2 }}
+          className="text-center mt-12 text-text-subtle text-sm"
         >
           <p>Powered by advanced AI language models • Real-time WebSocket streaming</p>
         </motion.footer>

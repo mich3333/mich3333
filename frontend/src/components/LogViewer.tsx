@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import type { AgentUpdate } from '../types';
 import { AGENT_CONFIG, STATUS_COLORS } from '../types';
+import { Card } from './ui/card';
+import { Badge } from './ui/badge';
 
 interface LogViewerProps {
   updates: AgentUpdate[];
@@ -20,42 +22,42 @@ export const LogViewer = ({ updates }: LogViewerProps) => {
 
   if (updates.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-400">
-        <div className="text-4xl mb-3">💭</div>
+      <div className="text-center py-12 text-text-muted">
+        <div className="text-4xl mb-3" aria-hidden="true">💭</div>
         <p>Execution log will appear here...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3 max-h-[500px] overflow-y-auto scrollbar-thin pr-2">
+    <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2" role="log" aria-live="polite">
       {updates.map((update, index) => {
         const config = AGENT_CONFIG[update.agent.toLowerCase()];
-        const statusColor = STATUS_COLORS[update.status] || 'bg-gray-500/20 text-gray-300';
+        const statusColor = STATUS_COLORS[update.status] || 'bg-text-subtle/10 text-text-subtle';
 
         return (
-          <div
+          <Card
             key={index}
-            className={`glass p-4 rounded-xl border-l-4 ${config.color} animate-slide-in-right`}
+            className={`p-4 border-l-4 ${config.color} transition-all duration-200`}
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-xl">{config.emoji}</span>
-                <span className="font-semibold capitalize">{update.agent}</span>
+                <span className="text-xl" aria-hidden="true">{config.emoji}</span>
+                <span className="font-semibold capitalize text-text">{update.agent}</span>
               </div>
-              <span className={`text-xs px-2 py-1 rounded-full ${statusColor}`}>
+              <Badge variant="outline" className={`text-xs ${statusColor}`}>
                 {update.status}
-              </span>
+              </Badge>
             </div>
-            <div className="text-sm text-gray-300 leading-relaxed">
+            <div className="text-sm text-text-muted leading-relaxed">
               {truncateMessage(update.message)}
             </div>
             {update.timestamp && (
-              <div className="text-xs text-gray-500 mt-2">
+              <div className="text-xs text-text-subtle mt-2">
                 {new Date(update.timestamp).toLocaleTimeString()}
               </div>
             )}
-          </div>
+          </Card>
         );
       })}
       <div ref={logEndRef} />

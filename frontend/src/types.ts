@@ -13,7 +13,7 @@ export interface AgentUpdate {
 
 export interface ExecutionResult {
   task: string;
-  result: Record<string, any>;
+  result: Record<string, unknown>;
   final_report?: string;
   execution_time?: number;
 }
@@ -21,34 +21,34 @@ export interface ExecutionResult {
 export const AGENT_CONFIG: Record<string, { emoji: string; gradient: string; color: string }> = {
   manager: {
     emoji: '👔',
-    gradient: 'from-amber-500 to-orange-500',
-    color: 'border-orange-500/50 bg-orange-500/5'
+    gradient: 'from-accent to-accent',
+    color: 'border-accent bg-accent/5'
   },
   researcher: {
     emoji: '🔍',
-    gradient: 'from-blue-500 to-cyan-500',
-    color: 'border-cyan-500/50 bg-cyan-500/5'
+    gradient: 'from-primary to-primary',
+    color: 'border-primary bg-primary/5'
   },
   coder: {
     emoji: '💻',
-    gradient: 'from-green-500 to-emerald-500',
-    color: 'border-green-500/50 bg-green-500/5'
+    gradient: 'from-success to-success',
+    color: 'border-success bg-success/5'
   },
   reviewer: {
     emoji: '🔎',
-    gradient: 'from-purple-500 to-violet-500',
-    color: 'border-purple-500/50 bg-purple-500/5'
+    gradient: 'from-primary to-primary',
+    color: 'border-primary bg-primary/5'
   },
   reporter: {
     emoji: '📊',
-    gradient: 'from-pink-500 to-rose-500',
-    color: 'border-pink-500/50 bg-pink-500/5'
+    gradient: 'from-accent to-accent',
+    color: 'border-accent bg-accent/5'
   }
 };
 
 export const STATUS_COLORS: Record<string, string> = {
-  working: 'bg-yellow-500/20 text-yellow-300',
-  completed: 'bg-green-500/20 text-green-300',
-  error: 'bg-red-500/20 text-red-300',
-  thinking: 'bg-blue-500/20 text-blue-300'
+  working: 'bg-warning/10 text-warning',
+  completed: 'bg-success/10 text-success',
+  error: 'bg-error/10 text-error',
+  thinking: 'bg-primary/10 text-primary'
 };

@@ -26,7 +26,7 @@ export type Database = {
           id: string;
           user_id: string;
           task: string;
-          result: any;
+          result: Record<string, unknown>;
           status: 'pending' | 'running' | 'completed' | 'error';
           created_at: string;
           execution_time?: number;

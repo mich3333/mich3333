@@ -65,7 +65,7 @@ export const useWebSocket = (serverUrl: string): UseWebSocketReturn => {
       setIsExecuting(false);
     });
 
-    socket.on('error', (error: any) => {
+    socket.on('error', (error: Error) => {
       console.error('❌ Socket error:', error);
       setIsExecuting(false);
       setError(error.message || 'An error occurred');
@@ -82,6 +82,7 @@ export const useWebSocket = (serverUrl: string): UseWebSocketReturn => {
   }, [connect]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     const socket = connect();
 
     return () => {
