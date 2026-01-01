@@ -113,30 +113,89 @@ User Task
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Project Structure
 
 ```
 multi-agent-system/
-├── agents/
-│   ├── __init__.py
-│   ├── base_agent.py       # Base agent class
-│   ├── manager.py          # Task coordinator
-│   ├── researcher.py       # Information gathering
-│   ├── coder.py           # Code implementation
-│   ├── reviewer.py        # Quality assurance
-│   └── reporter.py        # Documentation
-├── orchestrator.py         # Coordinates agent workflow
-├── app.py                 # Flask web application
-├── templates/
-│   └── index.html         # UI
-├── static/
-│   ├── css/style.css      # Styling
-│   └── js/app.js          # Frontend logic
-├── tests/
-│   └── test_agents.py     # Unit tests
-├── requirements.txt       # Dependencies
-└── README.md             # Documentation
+│
+├── 🐍 Backend (Python/Flask)
+│   ├── app.py                    # Flask server + WebSockets
+│   ├── orchestrator.py           # Multi-agent orchestration
+│   ├── requirements.txt          # Production dependencies
+│   ├── requirements-dev.txt      # Development dependencies (NEW)
+│   ├── pyproject.toml           # Ruff & pytest config (NEW)
+│   ├── Makefile                 # Quality gates & commands (NEW)
+│   │
+│   ├── agents/                   # Agent implementations
+│   │   ├── base_agent.py        # Base agent class
+│   │   ├── manager.py           # Task coordinator
+│   │   ├── researcher.py        # Information gathering
+│   │   ├── coder.py             # Code implementation
+│   │   ├── reviewer.py          # Quality assurance
+│   │   └── reporter.py          # Documentation
+│   │
+│   ├── tests/                    # Backend tests
+│   │   └── test_agents.py
+│   │
+│   ├── static/                   # 🔴 LEGACY UI (pre-React)
+│   │   └── LEGACY_UI.md         # Migration notice
+│   └── templates/                # 🔴 LEGACY templates
+│       └── LEGACY_UI.md         # Migration notice
+│
+├── ⚛️ Frontend (React/TypeScript)
+│   └── frontend/
+│       ├── src/
+│       │   ├── pages/           # Page components
+│       │   │   ├── Dashboard.tsx    # Main dashboard (Premium)
+│       │   │   ├── Login.tsx        # Authentication
+│       │   │   └── Signup.tsx       # Registration
+│       │   │
+│       │   ├── components/      # Reusable components
+│       │   │   ├── StatsCard.tsx
+│       │   │   ├── QuickActions.tsx
+│       │   │   ├── RecentActivity.tsx
+│       │   │   ├── AgentCard.tsx
+│       │   │   └── ...
+│       │   │
+│       │   ├── contexts/        # React contexts
+│       │   │   └── AuthContext.tsx  # Supabase auth
+│       │   │
+│       │   ├── hooks/           # Custom hooks
+│       │   │   └── useWebSocket.ts
+│       │   │
+│       │   ├── lib/             # External libraries
+│       │   │   └── supabase.ts
+│       │   │
+│       │   └── test/            # Frontend tests (NEW)
+│       │       ├── setup.ts
+│       │       └── example.test.ts
+│       │
+│       ├── package.json         # NPM dependencies & scripts
+│       ├── vite.config.ts       # Vite configuration
+│       ├── vitest.config.ts     # Vitest test config (NEW)
+│       ├── tailwind.config.js   # Tailwind CSS
+│       ├── tsconfig.json        # TypeScript config
+│       └── .env                 # Environment variables
+│
+├── 🧪 Quality & CI (NEW)
+│   ├── .github/
+│   │   └── workflows/
+│   │       └── ci.yml           # GitHub Actions CI
+│   └── Makefile                 # Backend quality commands
+│
+└── 📝 Documentation
+    ├── README.md
+    ├── .env.example
+    └── render.yaml              # Render deployment config
 ```
+
+### Key Directories
+
+- **`agents/`** - Core agent implementations with specialized roles
+- **`frontend/`** - Modern React + TypeScript frontend with Supabase auth
+- **`tests/`** - Backend test suite with pytest
+- **`frontend/src/test/`** - Frontend test suite with Vitest
+- **`static/` & `templates/`** - Legacy UI (marked for removal)
 
 ---
 
@@ -184,14 +243,68 @@ Reset all agents' conversation history.
 
 ---
 
-## 🧪 Testing
+## 🧪 Development & Quality
+
+### Backend Commands (via Makefile)
 
 ```bash
-# Run tests
-pytest tests/ -v
+# Install development dependencies
+make install-dev
 
-# Run with coverage
-pytest tests/ --cov=agents --cov-report=html
+# Run linter
+make lint
+
+# Auto-format code
+make format
+
+# Run tests
+make test
+
+# Run tests with coverage
+make test-cov
+
+# Clean generated files
+make clean
+
+# Run backend server
+make run
+```
+
+### Frontend Commands
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Run linter
+npm run lint
+
+# Type checking
+npm run typecheck
+
+# Run tests
+npm run test
+
+# Run all quality checks (lint + typecheck + test)
+npm run quality
+```
+
+### Running Full Quality Suite
+
+```bash
+# Backend
+make install-dev && make lint && make test
+
+# Frontend
+cd frontend && npm install && npm run quality
 ```
 
 ---
