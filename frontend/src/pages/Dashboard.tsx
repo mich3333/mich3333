@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { FloatingParticles } from '../components/FloatingParticles';
 import { StatusBadge } from '../components/StatusBadge';
 import { AgentCard } from '../components/AgentCard';
 import { TaskInput } from '../components/TaskInput';
@@ -10,6 +9,9 @@ import { ResultsPanel } from '../components/ResultsPanel';
 import { StatsCard } from '../components/StatsCard';
 import { QuickActions } from '../components/QuickActions';
 import { RecentActivity } from '../components/RecentActivity';
+import { Skeleton } from '../components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
+import { Button } from '../components/ui/button';
 import type { Agent } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -17,9 +19,11 @@ import { useAuth } from '../contexts/AuthContext';
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
 
 export const Dashboard = () => {
-  const { connected, executeTask, agentUpdates, result, isExecuting } = useWebSocket(SERVER_URL);
+  const { connected, connectionState, executeTask, agentUpdates, result, isExecuting, error, reconnect } = useWebSocket(SERVER_URL);
   const { user, signOut } = useAuth();
   const [agents, setAgents] = useState<Agent[]>([]);
+  const [agentsLoading, setAgentsLoading] = useState(true);
+  const [agentsError, setAgentsError] = useState<string | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [view, setView] = useState<'overview' | 'agents'>('overview');
 
@@ -28,11 +32,24 @@ export const Dashboard = () => {
   };
 
   // Load agents on mount
+  const loadAgents = async () => {
+    setAgentsLoading(true);
+    setAgentsError(null);
+    try {
+      const res = await fetch(`${SERVER_URL}/agents`);
+      if (!res.ok) throw new Error('Failed to load agents');
+      const data = await res.json();
+      setAgents(data.agents);
+    } catch (err) {
+      console.error('Failed to load agents:', err);
+      setAgentsError(err instanceof Error ? err.message : 'Failed to load agents');
+    } finally {
+      setAgentsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetch(`${SERVER_URL}/agents`)
-      .then((res) => res.json())
-      .then((data) => setAgents(data.agents))
-      .catch((err) => console.error('Failed to load agents:', err));
+    loadAgents();
   }, []);
 
   // Track active agent from updates
