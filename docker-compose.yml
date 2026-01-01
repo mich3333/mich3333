@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Backend - Flask + Python
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agenthub-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - FLASK_ENV=development
+    volumes:
+      - ./agents:/app/agents
+      - ./orchestrator.py:/app/orchestrator.py
+      - ./app.py:/app/app.py
+    networks:
+      - agenthub-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend - React + Vite
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: agenthub-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_SERVER_URL=http://localhost:5000
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+    networks:
+      - agenthub-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  agenthub-network:
+    driver: bridge

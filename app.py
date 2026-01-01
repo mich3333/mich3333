@@ -33,6 +33,12 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/health', methods=['GET'])
+def health():
+    """Health check endpoint for Docker."""
+    return jsonify({'status': 'healthy'}), 200
+
+
 @app.route('/api/status', methods=['GET'])
 def status():
     """Get system and agent status."""
