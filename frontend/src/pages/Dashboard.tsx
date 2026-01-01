@@ -63,7 +63,6 @@ export const Dashboard = () => {
       title: 'New Task',
       description: 'Start a new agent task',
       icon: '🚀',
-      gradient: 'from-purple-500/10 to-purple-500/5',
       onClick: () => setView('agents')
     },
     {
@@ -71,7 +70,6 @@ export const Dashboard = () => {
       title: 'History',
       description: 'View past executions',
       icon: '📜',
-      gradient: 'from-blue-500/10 to-blue-500/5',
       onClick: () => console.log('History')
     },
     {
@@ -79,7 +77,6 @@ export const Dashboard = () => {
       title: 'Settings',
       description: 'Manage preferences',
       icon: '⚙️',
-      gradient: 'from-pink-500/10 to-pink-500/5',
       onClick: () => console.log('Settings')
     },
     {
@@ -87,7 +84,6 @@ export const Dashboard = () => {
       title: 'Help',
       description: 'Get support',
       icon: '❓',
-      gradient: 'from-green-500/10 to-green-500/5',
       onClick: () => console.log('Help')
     },
   ];

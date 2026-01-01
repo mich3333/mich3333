@@ -8,8 +8,36 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#8b5cf6',
-        secondary: '#ec4899',
+        // Design tokens using CSS variables
+        bg: 'hsl(var(--bg))',
+        'bg-subtle': 'hsl(var(--bg-subtle))',
+
+        surface: 'hsl(var(--surface))',
+        'surface-hover': 'hsl(var(--surface-hover))',
+
+        border: 'hsl(var(--border))',
+        'border-hover': 'hsl(var(--border-hover))',
+
+        text: 'hsl(var(--text))',
+        'text-muted': 'hsl(var(--text-muted))',
+        'text-subtle': 'hsl(var(--text-subtle))',
+
+        primary: 'hsl(var(--primary))',
+        'primary-hover': 'hsl(var(--primary-hover))',
+        'primary-muted': 'hsl(var(--primary-muted))',
+
+        accent: 'hsl(var(--accent))',
+        'accent-hover': 'hsl(var(--accent-hover))',
+        'accent-muted': 'hsl(var(--accent-muted))',
+
+        success: 'hsl(var(--success))',
+        warning: 'hsl(var(--warning))',
+        error: 'hsl(var(--error))',
+      },
+      borderRadius: {
+        sm: 'var(--radius-sm)',
+        DEFAULT: 'var(--radius)',
+        lg: 'var(--radius-lg)',
       },
       animation: {
         'gradient': 'gradient 8s linear infinite',

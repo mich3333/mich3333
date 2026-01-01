@@ -17,34 +17,35 @@ export const StatsCard = ({ title, value, icon, trend, delay = 0 }: StatsCardPro
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay }}
-      className="glass-strong rounded-xl p-6 border border-white/10 hover:border-purple-500/30 transition-all"
+      transition={{ duration: 0.2, delay }}
+      className="rounded-lg border border-border bg-surface p-6 hover:border-border-hover transition-colors"
     >
       <div className="flex items-start justify-between mb-4">
-        <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg">
+        <div className="p-3 bg-primary-muted rounded-lg" aria-hidden="true">
           {icon}
         </div>
         {trend && (
           <div
-            className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
+            className={`flex items-center gap-1 text-xs px-2 py-1 rounded-md ${
               trend.isPositive
-                ? 'bg-green-500/20 text-green-400'
-                : 'bg-red-500/20 text-red-400'
+                ? 'bg-success/20 text-success'
+                : 'bg-error/20 text-error'
             }`}
+            aria-label={`${trend.isPositive ? 'Increase' : 'Decrease'} of ${Math.abs(trend.value)} percent`}
           >
-            <span>{trend.isPositive ? '↑' : '↓'}</span>
+            <span aria-hidden="true">{trend.isPositive ? '↑' : '↓'}</span>
             <span>{Math.abs(trend.value)}%</span>
           </div>
         )}
       </div>
 
       <div>
-        <p className="text-gray-400 text-sm mb-1">{title}</p>
+        <p className="text-text-muted text-sm mb-1">{title}</p>
         <motion.p
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.3, delay: delay + 0.2 }}
-          className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2, delay: delay + 0.1 }}
+          className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
         >
           {value}
         </motion.p>
