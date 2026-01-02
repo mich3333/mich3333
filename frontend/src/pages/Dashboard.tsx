@@ -1,18 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { StatusBadge } from '../components/StatusBadge';
 import { AgentCard } from '../components/AgentCard';
 import { TaskInput } from '../components/TaskInput';
 import { LogViewer } from '../components/LogViewer';
 import { ResultsPanel } from '../components/ResultsPanel';
-import { StatsCard } from '../components/StatsCard';
-import { QuickActions } from '../components/QuickActions';
 import { RecentActivity } from '../components/RecentActivity';
-import { LoadingAgents } from '../components/LoadingAgents';
-import { EmptyState } from '../components/EmptyState';
 import { Card } from '../components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
+import { Badge } from '../components/ui/badge';
+import { Alert, AlertDescription } from '../components/ui/alert';
 import { Button } from '../components/ui/button';
 import type { Agent } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,13 +17,13 @@ import { useAuth } from '../contexts/AuthContext';
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
 
 export const Dashboard = () => {
-  const { connected, connectionState, executeTask, agentUpdates, result, isExecuting, error, reconnect } = useWebSocket(SERVER_URL);
+  const { connectionState, executeTask, agentUpdates, result, isExecuting, error, reconnect } = useWebSocket(SERVER_URL);
   const { user, signOut } = useAuth();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agentsLoading, setAgentsLoading] = useState(true);
   const [agentsError, setAgentsError] = useState<string | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
-  const [view, setView] = useState<'overview' | 'agents'>('overview');
+  const [showLogs, setShowLogs] = useState(false);
 
   const handleLogout = async () => {
     await signOut();
@@ -66,46 +62,21 @@ export const Dashboard = () => {
     }
   }, [agentUpdates]);
 
-  // Mock data - will be replaced with real data from database
+  // Auto-expand logs when execution starts
+  useEffect(() => {
+    if (isExecuting && !showLogs) {
+      setShowLogs(true);
+    }
+  }, [isExecuting, showLogs]);
+
+  // Stats for header
   const stats = {
     tasksRun: agentUpdates.length,
     tasksCompleted: agentUpdates.filter(u => u.status === 'completed').length,
-    agentsActive: agents.length,
     successRate: agentUpdates.length > 0
       ? Math.round((agentUpdates.filter(u => u.status === 'completed').length / agentUpdates.length) * 100)
       : 0
   };
-
-  const quickActions = [
-    {
-      id: '1',
-      title: 'New Task',
-      description: 'Start a new agent task',
-      icon: '🚀',
-      onClick: () => setView('agents')
-    },
-    {
-      id: '2',
-      title: 'History',
-      description: 'View past executions',
-      icon: '📜',
-      onClick: () => console.log('History')
-    },
-    {
-      id: '3',
-      title: 'Settings',
-      description: 'Manage preferences',
-      icon: '⚙️',
-      onClick: () => console.log('Settings')
-    },
-    {
-      id: '4',
-      title: 'Help',
-      description: 'Get support',
-      icon: '❓',
-      onClick: () => console.log('Help')
-    },
-  ];
 
   const recentActivities = agentUpdates.slice(-5).reverse().map((update, index) => ({
     id: index.toString(),
@@ -115,288 +86,242 @@ export const Dashboard = () => {
     timestamp: update.timestamp ? new Date(update.timestamp).toLocaleTimeString() : 'Just now'
   }));
 
+  // Connection status badge variant
+  const getConnectionBadgeVariant = () => {
+    if (connectionState === 'connected') return 'default';
+    if (connectionState === 'error') return 'error';
+    return 'secondary';
+  };
+
+  const getConnectionText = () => {
+    if (connectionState === 'connected') return 'Connected';
+    if (connectionState === 'connecting') return 'Connecting...';
+    if (connectionState === 'error') return 'Disconnected';
+    return 'Disconnected';
+  };
+
   return (
     <div className="min-h-screen bg-bg">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* WebSocket Status Banner */}
-        {connectionState === 'error' && (
-          <Alert variant="error" className="mb-6">
-            <AlertTitle>Connection Error</AlertTitle>
-            <AlertDescription className="flex items-center justify-between">
-              <span>{error || 'Failed to connect to server'}</span>
-              <Button onClick={reconnect} variant="outline" size="sm">
-                Reconnect
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {connectionState === 'connecting' && (
-          <Alert className="mb-6">
-            <AlertDescription>Connecting to server...</AlertDescription>
-          </Alert>
-        )}
-
-        {/* Header */}
-        <motion.header
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex justify-between items-center mb-6">
+      {/* A1: Header Strip - Always Visible */}
+      <header className="sticky top-0 z-50 border-b border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
+        <div className="max-w-6xl mx-auto px-4 md:px-6">
+          {/* Top Row: Branding + User */}
+          <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-4">
-              <Card className="px-4 py-2">
-                <span className="text-sm text-text-muted">👤 {user?.email}</span>
-              </Card>
-              <StatusBadge connected={connected} />
+              <h1 className="text-2xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                🤖 AgentHub
+              </h1>
+              <Badge variant={getConnectionBadgeVariant()} className="text-xs">
+                {getConnectionText()}
+              </Badge>
             </div>
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              className="hover:border-error hover:text-error"
-            >
-              🚪 Logout
-            </Button>
+
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-text-muted hidden md:inline">
+                {user?.email}
+              </span>
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                size="sm"
+                className="text-text-muted hover:text-error"
+              >
+                Logout
+              </Button>
+            </div>
           </div>
 
-          <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-black mb-3 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              🤖 AgentHub
-            </h1>
-            <p className="text-lg text-text-muted">
-              Your AI Team Orchestrator
-            </p>
+          {/* Bottom Row: Stats Summary (compact) */}
+          <div className="flex items-center gap-6 pb-4 text-sm">
+            {agentsLoading ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="text-text-muted">Tasks:</span>
+                  <div className="h-5 w-8 bg-bg-subtle animate-pulse rounded" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-text-muted">Completed:</span>
+                  <div className="h-5 w-8 bg-bg-subtle animate-pulse rounded" />
+                </div>
+                <div className="flex items-center gap-2 hidden sm:flex">
+                  <span className="text-text-muted">Success Rate:</span>
+                  <div className="h-5 w-12 bg-bg-subtle animate-pulse rounded" />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="text-text-muted">Tasks:</span>
+                  <span className="font-semibold text-text">{stats.tasksRun}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-text-muted">Completed:</span>
+                  <span className="font-semibold text-success">{stats.tasksCompleted}</span>
+                </div>
+                <div className="flex items-center gap-2 hidden sm:flex">
+                  <span className="text-text-muted">Success Rate:</span>
+                  <span className="font-semibold text-text">{stats.successRate}%</span>
+                </div>
+              </>
+            )}
           </div>
-        </motion.header>
+        </div>
 
-        {/* View Toggle */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex justify-center mb-8"
-        >
-          <Card className="p-1 inline-flex gap-1">
-            <button
-              onClick={() => setView('overview')}
-              className={`px-6 py-2 rounded-lg transition-all duration-200 ${
-                view === 'overview'
-                  ? 'bg-primary text-white'
-                  : 'text-text-muted hover:text-text hover:bg-bg-subtle'
-              }`}
-            >
-              📊 Overview
-            </button>
-            <button
-              onClick={() => setView('agents')}
-              className={`px-6 py-2 rounded-lg transition-all duration-200 ${
-                view === 'agents'
-                  ? 'bg-primary text-white'
-                  : 'text-text-muted hover:text-text hover:bg-bg-subtle'
-              }`}
-            >
-              🤖 Agents
-            </button>
-          </Card>
-        </motion.div>
+        {/* WebSocket Error Banner */}
+        {connectionState === 'error' && (
+          <div className="border-t border-border">
+            <div className="max-w-6xl mx-auto px-4 md:px-6 py-3">
+              <Alert variant="error" className="mb-0">
+                <AlertDescription className="flex items-center justify-between">
+                  <span>{error || 'Failed to connect to server'}</span>
+                  <Button onClick={reconnect} variant="outline" size="sm">
+                    Reconnect
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            </div>
+          </div>
+        )}
+      </header>
 
-        {view === 'overview' ? (
+      {/* Main Layout: Workspace + Sidebar */}
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
+        <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+          {/* A2: Main Workspace */}
           <div className="space-y-6">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatsCard
-                title="Tasks Run"
-                value={stats.tasksRun}
-                icon={<span className="text-2xl">🚀</span>}
-                trend={{ value: 12, isPositive: true }}
-                delay={0}
-              />
-              <StatsCard
-                title="Completed"
-                value={stats.tasksCompleted}
-                icon={<span className="text-2xl">✅</span>}
-                trend={{ value: 8, isPositive: true }}
-                delay={0.1}
-              />
-              <StatsCard
-                title="Active Agents"
-                value={stats.agentsActive}
-                icon={<span className="text-2xl">🤖</span>}
-                delay={0.2}
-              />
-              <StatsCard
-                title="Success Rate"
-                value={`${stats.successRate}%`}
-                icon={<span className="text-2xl">📈</span>}
-                trend={{ value: 5, isPositive: true }}
-                delay={0.3}
-              />
-            </div>
-
-            {/* Main Content Grid */}
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <QuickActions actions={quickActions} />
-
-                {/* Agents Preview */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <Card className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-bold flex items-center gap-2 text-text">
-                        <span>👥</span>
-                        <span>AI Agents</span>
-                      </h3>
-                      <button
-                        onClick={() => setView('agents')}
-                        className="text-sm text-primary hover:text-primary-hover transition-colors duration-200"
-                      >
-                        View all →
-                      </button>
-                    </div>
-
-                    {agentsLoading ? (
-                      <div className="grid grid-cols-3 gap-3">
-                        {[...Array(3)].map((_, i) => (
-                          <div key={i} className="h-24 bg-bg-subtle animate-pulse rounded-lg" />
-                        ))}
-                      </div>
-                    ) : agentsError ? (
-                      <Alert variant="error">
-                        <AlertDescription className="flex items-center justify-between">
-                          <span>{agentsError}</span>
-                          <Button onClick={loadAgents} variant="outline" size="sm">
-                            Retry
-                          </Button>
-                        </AlertDescription>
-                      </Alert>
-                    ) : agents.length === 0 ? (
-                      <EmptyState
-                        icon="🤖"
-                        title="No Agents"
-                        description="No agents are currently available"
-                        action={{ label: "Retry", onClick: loadAgents }}
-                      />
-                    ) : (
-                      <div className="grid grid-cols-3 gap-3">
-                        {agents.slice(0, 3).map((agent) => (
-                          <AgentCard
-                            key={agent.name}
-                            agent={agent}
-                            isActive={activeAgent === agent.name.toLowerCase()}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </Card>
-                </motion.div>
-              </div>
-
-              {/* Sidebar */}
-              <div>
-                <RecentActivity activities={recentActivities} />
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Agents View */
-          <div className="space-y-8">
-            {/* Task Input */}
+            {/* Task Input (Prominent) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
             >
               <TaskInput onExecute={executeTask} isExecuting={isExecuting} />
             </motion.div>
 
-            {/* Agent Grid */}
+            {/* Results Panel */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
+              transition={{ duration: 0.2, delay: 0.05 }}
             >
-              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-text">
-                <span>👥</span>
-                <span>AI Agents</span>
-              </h2>
+              <Card className="p-6">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-text">
+                  <span>📊</span>
+                  <span>Results</span>
+                </h2>
+                <ResultsPanel result={result} />
+              </Card>
+            </motion.div>
 
-              {agentsLoading ? (
-                <LoadingAgents />
-              ) : agentsError ? (
-                <Alert variant="error">
-                  <AlertTitle>Failed to Load Agents</AlertTitle>
-                  <AlertDescription className="flex items-center justify-between">
-                    <span>{agentsError}</span>
+            {/* Execution Log (Collapsible) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: 0.1 }}
+            >
+              <Card className="overflow-hidden">
+                <button
+                  onClick={() => setShowLogs(!showLogs)}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-surface-hover transition-colors duration-200"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">📝</span>
+                    <h2 className="text-xl font-bold text-text">Execution Log</h2>
+                    {agentUpdates.length > 0 && (
+                      <Badge variant="secondary" className="ml-2">
+                        {agentUpdates.length}
+                      </Badge>
+                    )}
+                  </div>
+                  <motion.span
+                    animate={{ rotate: showLogs ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-text-muted"
+                  >
+                    ▼
+                  </motion.span>
+                </button>
+
+                <motion.div
+                  initial={false}
+                  animate={{
+                    height: showLogs ? 'auto' : 0,
+                    opacity: showLogs ? 1 : 0
+                  }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-6 pb-6">
+                    <LogViewer updates={agentUpdates} />
+                  </div>
+                </motion.div>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* A3: Side Column */}
+          <div className="space-y-6">
+            {/* Agents List (Compact) */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Card className="p-4">
+                <h3 className="text-sm font-bold mb-4 flex items-center gap-2 text-text">
+                  <span>👥</span>
+                  <span>AI Agents</span>
+                </h3>
+
+                {agentsLoading ? (
+                  <div className="space-y-2">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="h-16 bg-bg-subtle animate-pulse rounded-lg" />
+                    ))}
+                  </div>
+                ) : agentsError ? (
+                  <Alert variant="error" className="mb-0">
+                    <AlertDescription className="text-xs">
+                      <div className="flex flex-col gap-2">
+                        <span>{agentsError}</span>
+                        <Button onClick={loadAgents} variant="outline" size="sm" className="w-full">
+                          Retry
+                        </Button>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                ) : agents.length === 0 ? (
+                  <div className="text-center py-6">
+                    <div className="text-3xl mb-2">🤖</div>
+                    <p className="text-xs text-text-muted mb-3">No agents available</p>
                     <Button onClick={loadAgents} variant="outline" size="sm">
                       Retry
                     </Button>
-                  </AlertDescription>
-                </Alert>
-              ) : agents.length === 0 ? (
-                <EmptyState
-                  icon="🤖"
-                  title="No Agents Available"
-                  description="There are no agents currently configured in the system"
-                  action={{ label: "Retry Loading", onClick: loadAgents }}
-                />
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  {agents.map((agent) => (
-                    <AgentCard
-                      key={agent.name}
-                      agent={agent}
-                      isActive={activeAgent === agent.name.toLowerCase()}
-                    />
-                  ))}
-                </div>
-              )}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {agents.map((agent) => (
+                      <AgentCard
+                        key={agent.name}
+                        agent={agent}
+                        isActive={activeAgent === agent.name.toLowerCase()}
+                      />
+                    ))}
+                  </div>
+                )}
+              </Card>
             </motion.div>
 
-            {/* Execution Log and Results */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <Card className="p-6 border-l-4 border-primary">
-                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-text">
-                    <span>📝</span>
-                    <span>Execution Log</span>
-                  </h2>
-                  <LogViewer updates={agentUpdates} />
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <Card className="p-6 border-l-4 border-accent">
-                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-text">
-                    <span>📊</span>
-                    <span>Results</span>
-                  </h2>
-                  <ResultsPanel result={result} />
-                </Card>
-              </motion.div>
-            </div>
+            {/* Recent Activity (Compact) */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2, delay: 0.05 }}
+            >
+              <RecentActivity activities={recentActivities} isLoading={agentsLoading} />
+            </motion.div>
           </div>
-        )}
-
-        {/* Footer */}
-        <motion.footer
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-center mt-12 text-text-subtle text-sm"
-        >
-          <p>Powered by advanced AI language models • Real-time WebSocket streaming</p>
-        </motion.footer>
+        </div>
       </div>
     </div>
   );

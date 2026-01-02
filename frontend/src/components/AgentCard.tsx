@@ -14,8 +14,8 @@ export const AgentCard = ({ agent, isActive }: AgentCardProps) => {
     <Card
       className={`
         p-4 cursor-pointer group transition-all duration-200
-        hover:border-border-hover hover:scale-[1.02]
-        ${isActive ? 'ring-2 ring-primary scale-[1.05]' : ''}
+        hover:border-border-hover
+        ${isActive ? 'ring-2 ring-primary' : ''}
       `}
       data-agent={agent.name.toLowerCase()}
       role="button"
@@ -24,7 +24,7 @@ export const AgentCard = ({ agent, isActive }: AgentCardProps) => {
       aria-pressed={isActive}
     >
       <div
-        className="w-14 h-14 mx-auto mb-3 rounded-lg bg-primary-muted flex items-center justify-center text-2xl transition-transform duration-200 group-hover:scale-[1.05]"
+        className="w-14 h-14 mx-auto mb-3 rounded-lg bg-primary-muted flex items-center justify-center text-2xl"
         aria-hidden="true"
       >
         {config.emoji}
