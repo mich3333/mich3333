@@ -2,17 +2,18 @@
 """
 Tests for Multi-Agent System
 """
-import pytest
 import os
+
+import pytest
+
 from agents import (
     BaseAgent,
-    ManagerAgent,
-    ResearcherAgent,
     CoderAgent,
+    ManagerAgent,
+    ReporterAgent,
+    ResearcherAgent,
     ReviewerAgent,
-    ReporterAgent
 )
-
 
 # Skip tests if API key not available
 pytestmark = pytest.mark.skipif(

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
 Researcher Agent - Gathers information and performs research.
+Writes findings to shared MissionContext.
 """
+from models.state import AgentResponse, MissionContext
+
 from .base_agent import BaseAgent
 
 
@@ -12,6 +15,7 @@ class ResearcherAgent(BaseAgent):
     - Analysis and research
     - Finding best practices
     - Comparing approaches
+    - **Writing findings to shared_findings**
     """
 
     def __init__(self, **kwargs):
@@ -32,10 +36,12 @@ Your style:
 - Highlight key findings
 
 Format your responses with:
-1. Executive Summary
-2. Key Findings
-3. Recommendations
-4. Considerations/Risks"""
+1. **Executive Summary** (2-3 sentences)
+2. **Key Findings** (bulleted list)
+3. **Recommendations** (specific, actionable)
+4. **Considerations/Risks** (potential issues)
+
+Be thorough but focused. Your research will be used by the Coder and Reviewer agents."""
 
         super().__init__(
             name="Researcher",
@@ -44,18 +50,35 @@ Format your responses with:
             **kwargs
         )
 
-    def research(self, topic: str, context: dict = None) -> str:
+    async def research(
+        self,
+        topic: str,
+        context: MissionContext
+    ) -> AgentResponse:
         """
-        Conduct research on a specific topic.
+        Conduct research on a specific topic and write to shared_findings.
 
         Args:
             topic: The research topic/question
-            context: Additional context
+            context: MissionContext (findings written here)
 
         Returns:
-            Research findings
+            AgentResponse with research results
         """
-        return self.think(
+        response = await self.think(
             task=f"Research this topic:\n\n{topic}",
-            context=context or {}
+            context=context
         )
+
+        if response.success:
+            # Write research findings to shared context
+            context.shared_findings.research_data[topic] = response.output
+            context.shared_findings.metadata['last_research'] = topic
+
+            self.log_to_websocket(
+                self.name,
+                "completed",
+                "📚 Research findings saved to shared knowledge base"
+            )
+
+        return response

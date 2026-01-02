@@ -17,7 +17,7 @@ import { useAuth } from '../contexts/AuthContext';
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
 
 export const Dashboard = () => {
-  const { connectionState, executeTask, agentUpdates, result, isExecuting, error, reconnect } = useWebSocket(SERVER_URL);
+  const { connectionState, executeTask, cancelTask, agentUpdates, result, isExecuting, error, reconnect, currentTaskId } = useWebSocket(SERVER_URL);
   const { user, signOut } = useAuth();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agentsLoading, setAgentsLoading] = useState(true);
@@ -195,7 +195,39 @@ export const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <TaskInput onExecute={executeTask} isExecuting={isExecuting} />
+              <div className="space-y-4">
+                <TaskInput onExecute={executeTask} isExecuting={isExecuting} />
+
+                {/* Kill Switch - Only show when executing */}
+                {isExecuting && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Alert variant="warning" className="border-amber-500/50 bg-amber-500/10">
+                      <AlertDescription className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-amber-400 font-semibold">⚡ Task Executing...</span>
+                          {currentTaskId && (
+                            <span className="text-xs text-text-subtle">ID: {currentTaskId}</span>
+                          )}
+                        </div>
+                        <Button
+                          onClick={cancelTask}
+                          variant="outline"
+                          size="sm"
+                          className="ml-4 border-red-500/50 text-red-400 hover:bg-red-500/10"
+                        >
+                          <span className="mr-1">🛑</span>
+                          Kill Switch
+                        </Button>
+                      </AlertDescription>
+                    </Alert>
+                  </motion.div>
+                )}
+              </div>
             </motion.div>
 
             {/* Results Panel */}

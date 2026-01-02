@@ -2,6 +2,8 @@
 """
 Reporter Agent - Creates documentation and summaries.
 """
+from models.state import AgentResponse, MissionContext
+
 from .base_agent import BaseAgent
 
 
@@ -32,11 +34,11 @@ Your documentation principles:
 - Action-oriented language
 
 Format your reports with:
-1. Executive Summary
-2. Overview/Introduction
-3. Detailed Sections (well-organized)
-4. Examples and Usage
-5. Conclusion/Next Steps
+1. **Executive Summary** (2-3 sentences)
+2. **Overview/Introduction**
+3. **Detailed Sections** (well-organized)
+4. **Examples and Usage**
+5. **Conclusion/Next Steps**
 
 Use markdown formatting:
 - Headers for structure
@@ -53,23 +55,27 @@ Make everything accessible and professional."""
             **kwargs
         )
 
-    def report(self, data: dict, report_type: str = "summary") -> str:
+    async def report(
+        self,
+        task_summary: str,
+        context: MissionContext,
+        report_type: str = "full"
+    ) -> AgentResponse:
         """
-        Create a report from the provided data.
+        Create a comprehensive report from MissionContext.
 
         Args:
-            data: The data to report on
+            task_summary: Summary of what was accomplished
+            context: MissionContext with all agent outputs
             report_type: Type of report (summary, full, technical)
 
         Returns:
-            Formatted report
+            AgentResponse with formatted report
         """
-        context = {
-            "report_type": report_type,
-            "data": str(data)
-        }
-
-        return self.think(
-            task="Create a comprehensive report from the provided data",
+        # Context contains all necessary data (accessed via BaseAgent._build_prompt)
+        response = await self.think(
+            task=f"Create a {report_type} report. Summary: {task_summary}",
             context=context
         )
+
+        return response

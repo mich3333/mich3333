@@ -9,6 +9,9 @@ python-socketio>=5.10.0
 # Anthropic Claude AI
 anthropic>=0.39.0
 
+# Data validation
+pydantic>=2.0.0
+
 # Async support
 aiohttp>=3.9.0
 

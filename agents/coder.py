@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
 Coder Agent - Writes code and implements solutions.
+Writes code artifacts to shared MissionContext.
 """
+from models.state import AgentResponse, MissionContext
+
 from .base_agent import BaseAgent
 
 
@@ -12,6 +15,7 @@ class CoderAgent(BaseAgent):
     - Implementing algorithms and solutions
     - Following best practices
     - Creating modular, testable code
+    - **Writing code to shared_findings**
     """
 
     def __init__(self, **kwargs):
@@ -32,16 +36,18 @@ Your principles:
 - Security awareness
 
 Format your code responses with:
-1. Brief explanation of approach
-2. Well-commented code
-3. Usage examples
-4. Notes on edge cases handled
+1. **Brief explanation of approach** (2-3 sentences)
+2. **Well-commented code** (with docstrings)
+3. **Usage examples** (how to use the code)
+4. **Notes on edge cases handled**
 
 Always write code that is:
 - Readable
 - Efficient
 - Secure
-- Well-documented"""
+- Well-documented
+
+**IMPORTANT:** If you receive review feedback, carefully address ALL issues mentioned."""
 
         super().__init__(
             name="Coder",
@@ -50,22 +56,47 @@ Always write code that is:
             **kwargs
         )
 
-    def code(self, task: str, language: str = "python", context: dict = None) -> str:
+    async def code(
+        self,
+        task: str,
+        language: str = "python",
+        context: MissionContext = None
+    ) -> AgentResponse:
         """
-        Write code for a specific task.
+        Write code for a specific task and save to shared_findings.
 
         Args:
             task: The coding task
             language: Programming language
-            context: Additional context (specs, constraints, etc.)
+            context: MissionContext (code written here)
 
         Returns:
-            Code implementation
+            AgentResponse with code implementation
         """
-        full_context = context or {}
-        full_context['language'] = language
+        # Build task with language context
+        full_task = f"Implement this in {language}:\n\n{task}"
 
-        return self.think(
-            task=f"Implement this:\n\n{task}",
-            context=full_context
+        # Check if there's review feedback to address
+        if context and context.shared_findings.review_feedback:
+            full_task += "\n\n**CRITICAL: Address this review feedback:**\n"
+            for i, feedback in enumerate(context.shared_findings.review_feedback, 1):
+                full_task += f"{i}. {feedback}\n"
+
+        response = await self.think(
+            task=full_task,
+            context=context
         )
+
+        if response.success:
+            # Write code artifact to shared context
+            artifact_key = f"{task[:50]}_{language}"
+            context.shared_findings.code_artifacts[artifact_key] = response.output
+            context.shared_findings.metadata['last_language'] = language
+
+            self.log_to_websocket(
+                self.name,
+                "completed",
+                "💾 Code artifact saved to shared knowledge base"
+            )
+
+        return response

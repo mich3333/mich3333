@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 """
-Multi-Agent System - Flask Web Application with WebSockets
+Multi-Agent System - Flask Web Application with Async WebSockets
 """
+import asyncio
 import os
-from flask import Flask, render_template, request, jsonify
+
+from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
+
 from orchestrator import MultiAgentOrchestrator
 
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
-# Initialize orchestrator
+# Global orchestrator instance
 orchestrator = None
 
 
@@ -23,7 +26,23 @@ def get_orchestrator():
         api_key = os.getenv('ANTHROPIC_API_KEY')
         if not api_key:
             raise ValueError("ANTHROPIC_API_KEY environment variable not set")
-        orchestrator = MultiAgentOrchestrator(api_key=api_key)
+
+        # Create websocket callback
+        def websocket_broadcast(agent: str, status: str, message: str):
+            """Broadcast agent updates to all connected clients."""
+            try:
+                socketio.emit('agent_update', {
+                    'agent': agent,
+                    'status': status,
+                    'message': message
+                })
+            except Exception as e:
+                print(f"Broadcast error: {e}")
+
+        orchestrator = MultiAgentOrchestrator(
+            api_key=api_key,
+            websocket_callback=websocket_broadcast
+        )
     return orchestrator
 
 
@@ -47,34 +66,9 @@ def status():
         return jsonify({
             'status': 'online',
             'agents': orch.get_agent_status(),
+            'active_tasks': orch.get_active_tasks(),
             'anthropic_key_set': bool(os.getenv('ANTHROPIC_API_KEY'))
         })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/api/execute', methods=['POST'])
-def execute_task():
-    """
-    Execute a task with the multi-agent system.
-
-    Request body:
-    {
-        "task": "User's complex task"
-    }
-    """
-    try:
-        data = request.get_json()
-        if not data or 'task' not in data:
-            return jsonify({'error': 'Missing task in request'}), 400
-
-        user_task = data['task']
-
-        orch = get_orchestrator()
-        result = orch.execute_task(user_task)
-
-        return jsonify(result)
-
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -83,52 +77,40 @@ def execute_task():
 def get_agents():
     """Get information about all available agents."""
     try:
-        orch = get_orchestrator()
         return jsonify({
             'agents': [
                 {
                     'name': 'Manager',
                     'role': 'Task Coordinator & Delegation',
                     'emoji': '🎯',
-                    'description': 'Analyzes complex tasks and coordinates the team'
+                    'description': 'Analyzes tasks and creates JSON execution plans'
                 },
                 {
                     'name': 'Researcher',
                     'role': 'Information Gathering & Analysis',
                     'emoji': '🔍',
-                    'description': 'Researches and analyzes information'
+                    'description': 'Researches and writes findings to shared memory'
                 },
                 {
                     'name': 'Coder',
                     'role': 'Code Implementation & Development',
                     'emoji': '💻',
-                    'description': 'Writes clean, efficient code'
+                    'description': 'Writes code with retry logic based on review feedback'
                 },
                 {
                     'name': 'Reviewer',
                     'role': 'Quality Assurance & Code Review',
                     'emoji': '✅',
-                    'description': 'Reviews code and ensures quality'
+                    'description': 'Reviews code and provides APPROVED/REJECTED/NEEDS_REVISION decisions'
                 },
                 {
                     'name': 'Reporter',
                     'role': 'Documentation & Reporting',
                     'emoji': '📊',
-                    'description': 'Creates documentation and summaries'
+                    'description': 'Creates final documentation from shared context'
                 }
             ]
         })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/api/reset', methods=['POST'])
-def reset():
-    """Reset all agents' conversation history."""
-    try:
-        orch = get_orchestrator()
-        orch.reset_all_agents()
-        return jsonify({'status': 'reset', 'message': 'All agents reset successfully'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -147,9 +129,16 @@ def handle_disconnect():
     print('🔌 Client disconnected')
 
 
-@socketio.on('execute_realtime')
-def handle_realtime_execution(data):
-    """Execute task with real-time updates via WebSocket."""
+@socketio.on('start_task')
+def handle_start_task(data):
+    """
+    Start a new task execution (async).
+
+    Expected data:
+    {
+        "task": "User's task description"
+    }
+    """
     try:
         user_task = data.get('task', '')
         if not user_task:
@@ -160,40 +149,79 @@ def handle_realtime_execution(data):
         orch = get_orchestrator()
 
         # Emit start event
-        emit('execution_start', {'task': user_task})
+        emit('execution_start', {
+            'task': user_task,
+            'message': 'Task execution started'
+        })
 
-        # Execute with custom callback for real-time updates
-        def emit_progress(agent, status, message):
-            socketio.emit('agent_update', {
-                'agent': agent,
-                'status': status,
-                'message': message
-            })
-
-        # Monkey-patch the orchestrator's log function for this execution
-        original_log = orch._log
-        def realtime_log(agent, status, message):
-            original_log(agent, status, message)
-            emit_progress(agent, status, message)
-
-        orch._log = realtime_log
+        # Run async task in event loop
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
         try:
-            # Execute the task
-            result = orch.execute_task(user_task)
+            # Execute the task (async)
+            result = loop.run_until_complete(orch.execute_task(user_task))
 
             # Emit completion
             emit('execution_complete', {
                 'result': result,
+                'task_id': result.get('task_id'),
+                'status': result.get('status'),
                 'final_report': result.get('final_report', '')
             })
 
         finally:
-            # Restore original log function
-            orch._log = original_log
+            loop.close()
 
     except Exception as e:
-        emit('error', {'message': str(e)})
+        emit('error', {'message': f'Task execution failed: {str(e)}'})
+
+
+@socketio.on('cancel_task')
+def handle_cancel_task(data):
+    """
+    Cancel an active task.
+
+    Expected data:
+    {
+        "task_id": "task_id_to_cancel"
+    }
+    """
+    try:
+        task_id = data.get('task_id', '')
+        if not task_id:
+            emit('error', {'message': 'No task_id provided'})
+            return
+
+        # Get orchestrator
+        orch = get_orchestrator()
+
+        # Cancel the task
+        orch.cancel_task(task_id)
+
+        emit('task_cancelled', {
+            'task_id': task_id,
+            'message': f'Task {task_id} cancellation requested'
+        })
+
+    except Exception as e:
+        emit('error', {'message': f'Task cancellation failed: {str(e)}'})
+
+
+@socketio.on('get_active_tasks')
+def handle_get_active_tasks():
+    """Get list of currently active tasks."""
+    try:
+        orch = get_orchestrator()
+        active_tasks = orch.get_active_tasks()
+
+        emit('active_tasks', {
+            'tasks': active_tasks,
+            'count': len(active_tasks)
+        })
+
+    except Exception as e:
+        emit('error', {'message': f'Failed to get active tasks: {str(e)}'})
 
 
 if __name__ == '__main__':
@@ -202,14 +230,22 @@ if __name__ == '__main__':
 
     print(f"""
     ╔══════════════════════════════════════════╗
-    ║   🤖 Multi-Agent System Starting...     ║
-    ║   ⚡ WebSockets Enabled!                ║
+    ║   🤖 Multi-Agent System v2.0            ║
+    ║   ⚡ Async + Feedback Loops Enabled!   ║
     ╚══════════════════════════════════════════╝
 
     📍 Server: http://localhost:{port}
     🔑 API Key: {'✅ Set' if os.getenv('ANTHROPIC_API_KEY') else '❌ Not Set'}
     🎯 Agents: Manager, Researcher, Coder, Reviewer, Reporter
-    ⚡ Real-time: WebSockets streaming enabled
+    ⚡ Real-time: WebSockets with async execution
+    🔄 Feedback Loop: Reviewer → Coder retry logic
+    🎨 Shared State: MissionContext with audit trail
+
+    WebSocket Events:
+    - start_task: Execute a new task
+    - cancel_task: Cancel running task
+    - get_active_tasks: List active tasks
+    - agent_update: Real-time agent thoughts (emitted)
 
     """)
 
