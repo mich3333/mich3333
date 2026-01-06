@@ -149,6 +149,167 @@
     </div>
 </section>
 
+<!-- Projects Portfolio -->
+<section class="py-20 bg-gray-800">
+    <div class="container mx-auto px-6">
+        <h2 class="text-5xl font-bold text-center mb-4 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">פרויקטים</h2>
+        <p class="text-center text-gray-400 mb-16 text-lg">פרויקטי AI ו-Full Stack מתקדמים</p>
+
+        <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+
+            <!-- Project 1: AgentHub -->
+            <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden border border-purple-500/30 hover:border-purple-500 transition-all hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2">
+                <div class="p-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="text-5xl">🤝</div>
+                        <div>
+                            <h3 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">AgentHub</h3>
+                            <p class="text-sm text-gray-400">Multi-Agent AI System</p>
+                        </div>
+                    </div>
+
+                    <p class="text-gray-300 mb-6 leading-relaxed">
+                        מערכת AI רב-סוכנים מתקדמת עם <strong>Feedback Loops</strong> ו-<strong>Shared State</strong>.
+                        5 AI agents שעובדים בשיתוף פעולה: Manager, Researcher, Coder, Reviewer ו-Reporter.
+                    </p>
+
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
+                            <div class="text-2xl font-bold text-purple-400">2,497</div>
+                            <div class="text-xs text-gray-400">שורות קוד</div>
+                        </div>
+                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
+                            <div class="text-2xl font-bold text-green-400">5</div>
+                            <div class="text-xs text-gray-400">AI Agents</div>
+                        </div>
+                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
+                            <div class="text-2xl font-bold text-blue-400">100%</div>
+                            <div class="text-xs text-gray-400">Async</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 mb-6">
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">Feedback Loop: Coder → Reviewer (max 2 iterations)</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">Shared State System (MissionContext + Pydantic)</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">Real-time WebSocket (Flask-SocketIO)</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">React + TypeScript UI עם Glassmorphism</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">Exponential Backoff + Auto-reconnect</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300">Python AsyncIO</span>
+                        <span class="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-full text-xs text-blue-300">React 18</span>
+                        <span class="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full text-xs text-green-300">TypeScript</span>
+                        <span class="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 rounded-full text-xs text-yellow-300">Claude Opus 4.5</span>
+                        <span class="px-3 py-1 bg-pink-500/20 border border-pink-500/30 rounded-full text-xs text-pink-300">Pydantic v2</span>
+                        <span class="px-3 py-1 bg-cyan-500/20 border border-cyan-500/30 rounded-full text-xs text-cyan-300">WebSocket</span>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <a href="https://github.com/mich3333/mich3333/tree/claude/multi-agent-system-rlmis"
+                           target="_blank"
+                           class="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg font-semibold text-center hover:shadow-lg hover:shadow-purple-500/50 transition-all transform hover:-translate-y-1">
+                            📂 GitHub Repo
+                        </a>
+                        <a href="https://github.com/mich3333/mich3333/blob/claude/multi-agent-system-rlmis/multi-agent-system/IMPLEMENTATION_SUMMARY.md"
+                           target="_blank"
+                           class="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg font-semibold text-center hover:bg-white/20 transition-all">
+                            📄 תיעוד
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 2: Autonomous Claude -->
+            <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden border border-blue-500/30 hover:border-blue-500 transition-all hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-2">
+                <div class="p-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="text-5xl">🤖</div>
+                        <div>
+                            <h3 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent">Autonomous Claude</h3>
+                            <p class="text-sm text-gray-400">Autonomous AI Agent</p>
+                        </div>
+                    </div>
+
+                    <p class="text-gray-300 mb-6 leading-relaxed">
+                        סוכן AI אוטונומי עם מערכת <strong>Dual Memory</strong> (Short-term + Long-term).
+                        מסוגל לקרוא, לחשוב, לפעול וללמוד באופן עצמאי.
+                    </p>
+
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
+                            <div class="text-2xl font-bold text-blue-400">2,680+</div>
+                            <div class="text-xs text-gray-400">שורות קוד</div>
+                        </div>
+                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
+                            <div class="text-2xl font-bold text-green-400">SQLite</div>
+                            <div class="text-xs text-gray-400">Memory DB</div>
+                        </div>
+                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
+                            <div class="text-2xl font-bold text-purple-400">100%</div>
+                            <div class="text-xs text-gray-400">אוטונומי</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 mb-6">
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">Decision Loop: READ → THINK → ACT → LEARN</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">Dual Memory System (Short-term + Long-term)</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">Claude AI Integration (Anthropic)</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">Web Interface עם Figma Integration</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-full text-xs text-blue-300">Python</span>
+                        <span class="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full text-xs text-green-300">Flask</span>
+                        <span class="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300">SQLite</span>
+                        <span class="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 rounded-full text-xs text-yellow-300">Claude AI</span>
+                        <span class="px-3 py-1 bg-pink-500/20 border border-pink-500/30 rounded-full text-xs text-pink-300">TypeScript</span>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <a href="/dashboard"
+                           class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg font-semibold text-center hover:shadow-lg hover:shadow-blue-500/50 transition-all transform hover:-translate-y-1">
+                            🚀 Dashboard
+                        </a>
+                        <a href="#features"
+                           class="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg font-semibold text-center hover:bg-white/20 transition-all">
+                            📚 תכונות
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
 <!-- Tech Stack -->
 <section class="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
     <div class="container mx-auto px-6">
