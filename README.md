@@ -123,11 +123,11 @@ POST /api/memories/add       # Add new memory
 POST /api/database/clear     # Clear all memories
 ```
 
-#### ChatGPT
+#### Claude AI
 ```http
-POST /api/chatgpt/think      # Ask ChatGPT to think
-POST /api/chatgpt/analyze    # Analyze and decide
-POST /api/chatgpt/learn      # Learn from experience
+POST /api/claude/think       # Ask Claude to think
+POST /api/claude/analyze     # Analyze and decide
+POST /api/claude/learn       # Learn from experience
 ```
 
 #### Figma Integration
@@ -144,7 +144,7 @@ POST /api/figma/import       # Import Figma design
 - **Flask 3.0** - Web framework
 - **SQLite** - Short-term memory database
 - **Qdrant** - Vector database for semantic search
-- **OpenAI API** - ChatGPT integration
+- **Anthropic API** - Claude Opus 4.5 integration
 
 ### Frontend
 - **TypeScript 5.0+** - Type-safe JavaScript
@@ -153,7 +153,7 @@ POST /api/figma/import       # Import Figma design
 - **Modern CSS** - Gradients, animations, responsive design
 
 ### AI & ML
-- **OpenAI GPT-3.5/4** - Language model
+- **Anthropic Claude Opus 4.5** - Language model
 - **Sentence Transformers** - Text embeddings
 - **Vector Search** - Semantic similarity
 
@@ -220,7 +220,7 @@ colors = client.extract_colors(design)
 
 ### 3. Intelligent Assistant
 ```python
-brain = ChatGPTBrain()
+brain = ClaudeBrain()
 decision = brain.think("How should I approach this problem?")
 # Get intelligent recommendations
 ```
@@ -233,7 +233,7 @@ decision = brain.think("How should I approach this problem?")
 
 ```bash
 # Required
-OPENAI_API_KEY=sk-...              # OpenAI API key
+ANTHROPIC_API_KEY=sk-ant-...       # Anthropic API key
 
 # Optional
 FIGMA_TOKEN=figd_...               # Figma Personal Access Token
@@ -285,7 +285,7 @@ Built with ❤️ using Claude AI, TypeScript, and Python
 
 ## 🙏 Acknowledgments
 
-- OpenAI for ChatGPT API
+- Anthropic for Claude AI API
 - Figma for design integration API
 - Qdrant for vector database
 - Tailwind CSS for modern styling
