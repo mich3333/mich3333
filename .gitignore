@@ -12,6 +12,7 @@ venv/
 autonomous-claude/data/
 autonomous-claude/**/*.db
 autonomous-claude/**/*.db-journal
+data/
 
 # Screenshots (optional - uncomment to exclude)
 # autonomous-claude/data/screenshots/
