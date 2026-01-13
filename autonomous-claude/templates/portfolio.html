@@ -3,234 +3,659 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autonomous Claude - Portfolio</title>
+    <title>Michel Dabah - AI Engineer & Full Stack Developer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        * { font-family: 'Inter', sans-serif; }
+
+        /* Animations */
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+        @keyframes glow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes rotatePulse { 0%, 100% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.1); } }
+
         .float-animation { animation: float 6s ease-in-out infinite; }
+        .glow-animation { animation: glow 3s ease-in-out infinite; }
+        .gradient-shift {
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Particles Canvas */
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Smooth Scroll */
+        html { scroll-behavior: smooth; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, #8b5cf6, #ec4899); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(to bottom, #a78bfa, #f472b6); }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 10s ease infinite;
+        }
+
+        /* 3D Card Effect */
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .card-3d:hover {
+            transform: rotateY(5deg) rotateX(5deg) translateZ(20px);
+        }
+
+        /* Reveal Animation on Scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Neon Button */
+        .neon-button {
+            position: relative;
+            overflow: hidden;
+        }
+        .neon-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .neon-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Skill Bar Animation */
+        .skill-bar {
+            position: relative;
+            width: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #8b5cf6, #ec4899);
+            border-radius: 4px;
+            transition: width 2s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .skill-bar.animate {
+            width: var(--skill-width);
+        }
+
+        /* Typing Effect */
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+        .typing-effect {
+            overflow: hidden;
+            border-left: 3px solid #8b5cf6;
+            white-space: nowrap;
+            animation: typing 3.5s steps(40) 1s 1 normal both, blink 0.75s step-end infinite;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body class="bg-black text-white overflow-x-hidden">
+
+<!-- Navigation -->
+<nav class="fixed top-0 w-full z-50 glass-strong">
+    <div class="container mx-auto px-6 py-4">
+        <div class="flex justify-between items-center">
+            <div class="text-2xl font-bold gradient-text">Michel Dabah</div>
+            <div class="hidden md:flex gap-8">
+                <a href="#about" class="hover:text-purple-400 transition">אודות</a>
+                <a href="#skills" class="hover:text-purple-400 transition">מיומנויות</a>
+                <a href="#projects" class="hover:text-purple-400 transition">פרויקטים</a>
+                <a href="#contact" class="hover:text-purple-400 transition">צור קשר</a>
+            </div>
+            <a href="/dashboard" class="neon-button px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg font-semibold relative z-10">
+                Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
 
 <!-- Hero -->
-<section class="min-h-screen flex items-center relative overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-    <div class="absolute inset-0 opacity-20">
-        <div class="absolute top-20 right-20 w-72 h-72 bg-purple-500 rounded-full filter blur-3xl animate-pulse"></div>
-        <div class="absolute bottom-20 left-20 w-96 h-96 bg-blue-500 rounded-full filter blur-3xl animate-pulse"></div>
+<section class="min-h-screen flex items-center relative overflow-hidden">
+    <!-- Animated Background -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Gradient Orbs -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl opacity-20 glow-animation"></div>
+        <div class="absolute bottom-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full filter blur-3xl opacity-20 glow-animation" style="animation-delay: 1.5s;"></div>
+        <div class="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500 rounded-full filter blur-3xl opacity-20 glow-animation" style="animation-delay: 3s;"></div>
     </div>
 
-    <div class="container mx-auto px-6 relative z-10">
+    <div class="container mx-auto px-6 relative z-10 pt-20">
         <div class="grid md:grid-cols-2 gap-12 items-center">
-            <div class="text-center md:text-right">
-                <div class="inline-block px-4 py-2 bg-purple-500/20 rounded-full border border-purple-500/30 mb-6">
-                    <span class="text-sm">🤖 Autonomous AI Agent</span>
+            <!-- Left: Text Content -->
+            <div class="text-center md:text-right space-y-8">
+                <!-- Badge -->
+                <div class="inline-block glass px-5 py-2 rounded-full border border-purple-500/30 mb-6" style="animation: fadeInUp 1s ease-out;">
+                    <span class="text-sm">👨‍💻 AI Engineer & Full Stack Developer</span>
                 </div>
-                <h1 class="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
-                    Autonomous Claude
+
+                <!-- Name with Gradient -->
+                <h1 class="text-7xl md:text-8xl font-black mb-6" style="animation: slideInRight 1s ease-out 0.2s both;">
+                    <span class="gradient-text">Michel</span><br>
+                    <span class="gradient-text">Dabah</span>
                 </h1>
-                <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl">
-                    מערכת AI אוטונומית עם זיכרון ו-Claude AI
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-end mb-12">
-                    <a href="/dashboard" class="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg font-semibold hover:shadow-xl hover:shadow-purple-500/50 transition-all transform hover:-translate-y-1">
-                        🚀 Dashboard
+
+                <!-- Typing Effect Description -->
+                <div class="text-2xl md:text-3xl text-gray-300 mb-8 max-w-2xl mx-auto md:mx-0" style="animation: fadeInUp 1s ease-out 0.4s both;">
+                    <p class="mb-4">בונה מערכות AI מתקדמות</p>
+                    <p class="text-lg text-gray-400 font-light">Multi-Agent Systems • Autonomous Agents • Full Stack Development</p>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-end mb-12" style="animation: fadeInUp 1s ease-out 0.6s both;">
+                    <a href="#projects" class="neon-button px-10 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all transform hover:scale-105 relative z-10">
+                        🚀 ראה פרויקטים
                     </a>
-                    <a href="#features" class="px-8 py-4 bg-white/10 border border-white/20 rounded-lg font-semibold hover:bg-white/20 transition-all">
-                        📚 למד עוד
+                    <a href="#contact" class="px-10 py-4 glass-strong rounded-xl font-bold text-lg hover:bg-white/20 transition-all transform hover:scale-105">
+                        💬 דבר איתי
                     </a>
                 </div>
-                <div class="grid grid-cols-3 gap-6">
-                    <div class="text-center">
-                        <div class="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">2,680+</div>
-                        <div class="text-sm text-gray-400 mt-1">שורות קוד</div>
+
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-3 gap-6 max-w-xl mx-auto md:mx-0" style="animation: fadeInUp 1s ease-out 0.8s both;">
+                    <div class="glass rounded-2xl p-4 text-center hover:glass-strong transition-all transform hover:scale-105 cursor-pointer">
+                        <div class="text-4xl font-black gradient-text">5,000+</div>
+                        <div class="text-xs text-gray-400 mt-2">שורות קוד</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">TypeScript</div>
-                        <div class="text-sm text-gray-400 mt-1">טכנולוגיה</div>
+                    <div class="glass rounded-2xl p-4 text-center hover:glass-strong transition-all transform hover:scale-105 cursor-pointer">
+                        <div class="text-4xl font-black gradient-text">7+</div>
+                        <div class="text-xs text-gray-400 mt-2">AI Agents</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">100%</div>
-                        <div class="text-sm text-gray-400 mt-1">אוטונומי</div>
+                    <div class="glass rounded-2xl p-4 text-center hover:glass-strong transition-all transform hover:scale-105 cursor-pointer">
+                        <div class="text-4xl font-black gradient-text">100%</div>
+                        <div class="text-xs text-gray-400 mt-2">Passion</div>
                     </div>
                 </div>
             </div>
-            <div class="float-animation">
-                <div class="bg-gray-800 rounded-2xl overflow-hidden shadow-2xl border border-gray-700">
-                    <div class="bg-gray-900 px-4 py-3 flex items-center gap-2">
+
+            <!-- Right: 3D Code Window -->
+            <div class="float-animation" style="animation-delay: 0.5s;">
+                <div class="card-3d glass-strong rounded-3xl overflow-hidden shadow-2xl border border-purple-500/30 hover:border-purple-500/50 transition-all">
+                    <!-- Window Header -->
+                    <div class="bg-black/50 px-6 py-4 flex items-center justify-between border-b border-gray-700">
                         <div class="flex gap-2">
-                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <div class="w-4 h-4 rounded-full bg-red-500 glow-animation"></div>
+                            <div class="w-4 h-4 rounded-full bg-yellow-500 glow-animation" style="animation-delay: 0.5s;"></div>
+                            <div class="w-4 h-4 rounded-full bg-green-500 glow-animation" style="animation-delay: 1s;"></div>
                         </div>
-                        <span class="text-sm text-gray-400 mr-3">autonomous_agent.py</span>
+                        <span class="text-sm text-gray-400 font-mono">autonomous_agent.py</span>
+                        <div class="text-purple-400 text-xs">●  Running</div>
                     </div>
-                    <div class="p-6 font-mono text-sm leading-relaxed">
-                        <div><span class="text-purple-400">class</span> <span class="text-blue-400">AutonomousAgent</span>:</div>
-                        <div class="mr-4"><span class="text-purple-400">def</span> <span class="text-green-400">run_cycle</span>(self):</div>
-                        <div class="mr-8 text-gray-500"># READ context</div>
-                        <div class="mr-8">memories = self.memory.get()</div>
-                        <div class="mr-8 mt-2 text-gray-500"># THINK with Claude AI
-                        <div class="mr-8">decision = self.brain.think()</div>
-                        <div class="mr-8 mt-2 text-gray-500"># ACT & LEARN</div>
-                        <div class="mr-8">self.execute(decision)</div>
+
+                    <!-- Code Content -->
+                    <div class="p-8 font-mono text-sm leading-relaxed bg-gradient-to-br from-black/50 to-purple-900/20">
+                        <div class="space-y-3">
+                            <div><span class="text-purple-400">class</span> <span class="text-blue-400 font-bold">AutonomousAgent</span><span class="text-gray-400">:</span></div>
+                            <div class="mr-6"><span class="text-purple-400">def</span> <span class="text-green-400">run_cycle</span><span class="text-gray-400">(</span><span class="text-orange-400">self</span><span class="text-gray-400">):</span></div>
+                            <div class="mr-12 text-gray-500"># 📖 READ context from memory</div>
+                            <div class="mr-12">memories <span class="text-purple-400">=</span> <span class="text-orange-400">self</span><span class="text-gray-400">.</span>memory<span class="text-gray-400">.</span><span class="text-green-400">get</span><span class="text-gray-400">()</span></div>
+                            <div class="mr-12 mt-3 text-gray-500"># 🧠 THINK with Claude AI</div>
+                            <div class="mr-12">decision <span class="text-purple-400">=</span> <span class="text-orange-400">self</span><span class="text-gray-400">.</span>brain<span class="text-gray-400">.</span><span class="text-green-400">think</span><span class="text-gray-400">(memories)</span></div>
+                            <div class="mr-12 mt-3 text-gray-500"># ⚡ ACT on decision</div>
+                            <div class="mr-12"><span class="text-orange-400">self</span><span class="text-gray-400">.</span><span class="text-green-400">execute</span><span class="text-gray-400">(decision)</span></div>
+                            <div class="mr-12 mt-3 text-gray-500"># 🎓 LEARN from results</div>
+                            <div class="mr-12"><span class="text-orange-400">self</span><span class="text-gray-400">.</span>memory<span class="text-gray-400">.</span><span class="text-green-400">store</span><span class="text-gray-400">(result)</span></div>
+                            <div class="mt-4"><span class="text-gray-500"># ♾️ Loop forever...</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Terminal Output -->
+                    <div class="bg-black/70 px-8 py-4 border-t border-gray-700">
+                        <div class="text-xs text-green-400 font-mono">
+                            <div>✓ Agent initialized successfully</div>
+                            <div>✓ Memory loaded: 1,234 entries</div>
+                            <div>✓ Claude AI connected</div>
+                            <div class="text-purple-400 mt-2">→ Running autonomous cycle... <span class="animate-pulse">▋</span></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <a href="#about" class="flex flex-col items-center text-gray-400 hover:text-purple-400 transition">
+            <span class="text-xs mb-2">גלול למטה</span>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </a>
+    </div>
 </section>
 
-<!-- Features -->
-<section id="features" class="py-20 bg-gray-900">
-    <div class="container mx-auto px-6">
-        <h2 class="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">תכונות מרכזיות</h2>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-purple-500 transition-all hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2">
-                <div class="text-5xl mb-4">🧠</div>
-                <h3 class="text-2xl font-bold mb-3">Claude AI Integration</h3>
-                <p class="text-gray-400 mb-4">אינטגרציה מלאה עם Anthropic Claude</p>
-                <ul class="space-y-2">
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Decision making</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Analysis & planning</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Learning</li>
-                </ul>
+<!-- About Section -->
+<section id="about" class="py-32 bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
+    <div class="container mx-auto px-6 relative z-10">
+        <div class="text-center mb-20 reveal">
+            <h2 class="text-6xl font-black mb-6">
+                <span class="gradient-text">מי אני?</span>
+            </h2>
+            <p class="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+                מפתח Full Stack ומהנדס AI עם תשוקה לבניית מערכות אוטונומיות מתקדמות.
+                מתמחה ב-Multi-Agent Systems, Autonomous AI, ו-Modern Web Development.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div class="glass-strong rounded-3xl p-8 reveal card-3d hover:shadow-2xl hover:shadow-purple-500/20">
+                <div class="text-6xl mb-6">🎯</div>
+                <h3 class="text-2xl font-bold mb-4 gradient-text">המיקוד שלי</h3>
+                <p class="text-gray-400 leading-relaxed">
+                    בונה מערכות AI שיכולות לחשוב, ללמוד ולפעול באופן עצמאי.
+                    מתמקד ב-Autonomous Agents, Multi-Agent Collaboration, ו-Intelligent Decision Making.
+                </p>
             </div>
-            <div class="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-purple-500 transition-all hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2">
-                <div class="text-5xl mb-4">💾</div>
-                <h3 class="text-2xl font-bold mb-3">Dual Memory</h3>
-                <p class="text-gray-400 mb-4">זיכרון דו-שכבתי</p>
-                <ul class="space-y-2">
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> SQLite</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Qdrant</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Auto-cleanup</li>
-                </ul>
+
+            <div class="glass-strong rounded-3xl p-8 reveal card-3d hover:shadow-2xl hover:shadow-blue-500/20" style="animation-delay: 0.2s;">
+                <div class="text-6xl mb-6">💡</div>
+                <h3 class="text-2xl font-bold mb-4 gradient-text">הגישה שלי</h3>
+                <p class="text-gray-400 leading-relaxed">
+                    משלב בין טכנולוגיות מתקדמות לעיצוב חכם. כל פרויקט הוא הזדמנות ללמוד,
+                    לחדש ולבנות משהו שבאמת עובד ומועיל.
+                </p>
             </div>
-            <div class="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-purple-500 transition-all hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2">
-                <div class="text-5xl mb-4">🌐</div>
-                <h3 class="text-2xl font-bold mb-3">Web Dashboard</h3>
-                <p class="text-gray-400 mb-4">ממשק Web מודרני</p>
-                <ul class="space-y-2">
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Interactive</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Real-time</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> REST API</li>
-                </ul>
+
+            <div class="glass-strong rounded-3xl p-8 reveal card-3d hover:shadow-2xl hover:shadow-pink-500/20" style="animation-delay: 0.4s;">
+                <div class="text-6xl mb-6">🚀</div>
+                <h3 class="text-2xl font-bold mb-4 gradient-text">החזון שלי</h3>
+                <p class="text-gray-400 leading-relaxed">
+                    לפתח מערכות AI שיכולות לעבוד יחד, ללמוד זו מזו, ולפתור בעיות מורכבות
+                    בצורה אוטונומית ויעילה.
+                </p>
             </div>
-            <div class="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-purple-500 transition-all hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2">
-                <div class="text-5xl mb-4">⚡</div>
-                <h3 class="text-2xl font-bold mb-3">Autonomous</h3>
-                <p class="text-gray-400 mb-4">הרצה אוטונומית</p>
-                <ul class="space-y-2">
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Decision loops</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Background</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Goal-driven</li>
-                </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Skills Section -->
+<section id="skills" class="py-32 bg-black relative overflow-hidden">
+    <div class="container mx-auto px-6 relative z-10">
+        <div class="text-center mb-20 reveal">
+            <h2 class="text-6xl font-black mb-6">
+                <span class="gradient-text">מיומנויות & טכנולוגיות</span>
+            </h2>
+            <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                המומחיות הטכנית שלי בעולמות ה-AI, Backend, ו-Frontend
+            </p>
+        </div>
+
+        <!-- Skill Categories -->
+        <div class="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+            <!-- AI & ML -->
+            <div class="glass-strong rounded-3xl p-8 reveal hover:shadow-2xl hover:shadow-purple-500/20 transition-all">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="text-5xl">🤖</div>
+                    <h3 class="text-3xl font-bold gradient-text">AI & Machine Learning</h3>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">Claude AI (Anthropic)</span>
+                            <span class="text-purple-400">95%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 95%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">Multi-Agent Systems</span>
+                            <span class="text-purple-400">90%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 90%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">Autonomous Agents</span>
+                            <span class="text-purple-400">92%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 92%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">Vector Databases (Qdrant)</span>
+                            <span class="text-purple-400">85%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 85%;"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-purple-500 transition-all hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2">
-                <div class="text-5xl mb-4">🔌</div>
-                <h3 class="text-2xl font-bold mb-3">API Integration</h3>
-                <p class="text-gray-400 mb-4">API מלא</p>
-                <ul class="space-y-2">
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> REST</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> JSON</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> CORS</li>
-                </ul>
+
+            <!-- Backend -->
+            <div class="glass-strong rounded-3xl p-8 reveal hover:shadow-2xl hover:shadow-blue-500/20 transition-all">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="text-5xl">⚙️</div>
+                    <h3 class="text-3xl font-bold gradient-text">Backend Development</h3>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">Python</span>
+                            <span class="text-blue-400">95%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 95%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">Flask / FastAPI</span>
+                            <span class="text-blue-400">88%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 88%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">Async Programming (asyncio)</span>
+                            <span class="text-blue-400">90%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 90%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">WebSocket (Real-time)</span>
+                            <span class="text-blue-400">85%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 85%;"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-purple-500 transition-all hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2">
-                <div class="text-5xl mb-4">🎨</div>
-                <h3 class="text-2xl font-bold mb-3">Modern Design</h3>
-                <p class="text-gray-400 mb-4">עיצוב מודרני</p>
-                <ul class="space-y-2">
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Responsive</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Dark mode</li>
-                    <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Animations</li>
-                </ul>
+
+            <!-- Frontend -->
+            <div class="glass-strong rounded-3xl p-8 reveal hover:shadow-2xl hover:shadow-pink-500/20 transition-all">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="text-5xl">🎨</div>
+                    <h3 class="text-3xl font-bold gradient-text">Frontend Development</h3>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">React 18</span>
+                            <span class="text-pink-400">90%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 90%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">TypeScript</span>
+                            <span class="text-pink-400">92%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 92%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">Tailwind CSS</span>
+                            <span class="text-pink-400">95%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 95%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">Modern UI/UX</span>
+                            <span class="text-pink-400">88%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 88%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tools & DevOps -->
+            <div class="glass-strong rounded-3xl p-8 reveal hover:shadow-2xl hover:shadow-green-500/20 transition-all">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="text-5xl">🛠️</div>
+                    <h3 class="text-3xl font-bold gradient-text">Tools & DevOps</h3>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">Git & GitHub</span>
+                            <span class="text-green-400">95%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 95%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">Docker</span>
+                            <span class="text-green-400">80%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 80%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">REST API Design</span>
+                            <span class="text-green-400">90%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 90%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-300 font-semibold">CI/CD & Testing</span>
+                            <span class="text-green-400">82%</span>
+                        </div>
+                        <div class="bg-gray-700/30 rounded-full h-2 overflow-hidden">
+                            <div class="skill-bar" style="--skill-width: 82%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tech Stack Icons -->
+        <div class="mt-20 reveal">
+            <h3 class="text-2xl font-bold text-center mb-10 text-gray-400">הטכנולוגיות שאיתן אני עובד</h3>
+            <div class="flex flex-wrap justify-center gap-6">
+                <div class="glass rounded-2xl px-6 py-4 hover:glass-strong transition-all transform hover:scale-110 cursor-pointer">
+                    <span class="text-2xl">🐍 Python</span>
+                </div>
+                <div class="glass rounded-2xl px-6 py-4 hover:glass-strong transition-all transform hover:scale-110 cursor-pointer">
+                    <span class="text-2xl">⚛️ React</span>
+                </div>
+                <div class="glass rounded-2xl px-6 py-4 hover:glass-strong transition-all transform hover:scale-110 cursor-pointer">
+                    <span class="text-2xl">📘 TypeScript</span>
+                </div>
+                <div class="glass rounded-2xl px-6 py-4 hover:glass-strong transition-all transform hover:scale-110 cursor-pointer">
+                    <span class="text-2xl">⚡ Flask</span>
+                </div>
+                <div class="glass rounded-2xl px-6 py-4 hover:glass-strong transition-all transform hover:scale-110 cursor-pointer">
+                    <span class="text-2xl">🗄️ SQLite</span>
+                </div>
+                <div class="glass rounded-2xl px-6 py-4 hover:glass-strong transition-all transform hover:scale-110 cursor-pointer">
+                    <span class="text-2xl">🔍 Qdrant</span>
+                </div>
+                <div class="glass rounded-2xl px-6 py-4 hover:glass-strong transition-all transform hover:scale-110 cursor-pointer">
+                    <span class="text-2xl">🤖 Claude AI</span>
+                </div>
+                <div class="glass rounded-2xl px-6 py-4 hover:glass-strong transition-all transform hover:scale-110 cursor-pointer">
+                    <span class="text-2xl">🎨 Tailwind</span>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Projects Portfolio -->
-<section class="py-20 bg-gray-800">
-    <div class="container mx-auto px-6">
-        <h2 class="text-5xl font-bold text-center mb-4 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">פרויקטים</h2>
-        <p class="text-center text-gray-400 mb-16 text-lg">פרויקטי AI ו-Full Stack מתקדמים</p>
+<section id="projects" class="py-32 bg-gradient-to-b from-black via-purple-900/20 to-black relative overflow-hidden">
+    <div class="container mx-auto px-6 relative z-10">
+        <div class="text-center mb-20 reveal">
+            <h2 class="text-6xl font-black mb-6">
+                <span class="gradient-text">הפרויקטים שלי</span>
+            </h2>
+            <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                פרויקטי AI ו-Full Stack מתקדמים שפיתחתי
+            </p>
+        </div>
 
-        <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
 
             <!-- Project 1: AgentHub -->
-            <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden border border-purple-500/30 hover:border-purple-500 transition-all hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2">
-                <div class="p-8">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="text-5xl">🤝</div>
-                        <div>
-                            <h3 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">AgentHub</h3>
-                            <p class="text-sm text-gray-400">Multi-Agent AI System</p>
+            <div class="glass-strong rounded-3xl overflow-hidden border border-purple-500/30 hover:border-purple-500/50 transition-all card-3d reveal">
+                <!-- Project Header with Badge -->
+                <div class="bg-gradient-to-br from-purple-900/30 to-pink-900/20 p-8 border-b border-purple-500/20">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-4">
+                            <div class="text-6xl">🤝</div>
+                            <div>
+                                <h3 class="text-3xl font-black gradient-text">AgentHub</h3>
+                                <p class="text-sm text-gray-400 mt-1">Multi-Agent AI System</p>
+                            </div>
+                        </div>
+                        <div class="glass px-3 py-1 rounded-full text-xs text-purple-300 border border-purple-500/30">
+                            Featured
                         </div>
                     </div>
 
-                    <p class="text-gray-300 mb-6 leading-relaxed">
-                        מערכת AI רב-סוכנים מתקדמת עם <strong>Feedback Loops</strong> ו-<strong>Shared State</strong>.
-                        5 AI agents שעובדים בשיתוף פעולה: Manager, Researcher, Coder, Reviewer ו-Reporter.
+                    <p class="text-gray-300 leading-relaxed text-lg">
+                        מערכת AI רב-סוכנים מתקדמת עם <strong class="text-purple-300">Feedback Loops</strong> ו-<strong class="text-purple-300">Shared State</strong>.
+                        5 AI agents שעובדים בשיתוף פעולה מלא.
                     </p>
+                </div>
 
-                    <div class="grid grid-cols-3 gap-4 mb-6">
-                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
-                            <div class="text-2xl font-bold text-purple-400">2,497</div>
-                            <div class="text-xs text-gray-400">שורות קוד</div>
+                <!-- Project Body -->
+                <div class="p-8">
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 gap-4 mb-8">
+                        <div class="glass rounded-xl p-4 text-center hover:glass-strong transition-all transform hover:scale-105">
+                            <div class="text-3xl font-black gradient-text">2,497</div>
+                            <div class="text-xs text-gray-400 mt-1">שורות קוד</div>
                         </div>
-                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
-                            <div class="text-2xl font-bold text-green-400">5</div>
-                            <div class="text-xs text-gray-400">AI Agents</div>
+                        <div class="glass rounded-xl p-4 text-center hover:glass-strong transition-all transform hover:scale-105">
+                            <div class="text-3xl font-black gradient-text">5</div>
+                            <div class="text-xs text-gray-400 mt-1">AI Agents</div>
                         </div>
-                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
-                            <div class="text-2xl font-bold text-blue-400">100%</div>
-                            <div class="text-xs text-gray-400">Async</div>
+                        <div class="glass rounded-xl p-4 text-center hover:glass-strong transition-all transform hover:scale-105">
+                            <div class="text-3xl font-black gradient-text">100%</div>
+                            <div class="text-xs text-gray-400 mt-1">Async</div>
                         </div>
                     </div>
 
-                    <div class="space-y-2 mb-6">
-                        <div class="flex items-center gap-2 text-sm">
-                            <span class="text-green-400">✓</span>
-                            <span class="text-gray-300">Feedback Loop: Coder → Reviewer (max 2 iterations)</span>
+                    <!-- Key Features -->
+                    <div class="space-y-3 mb-8">
+                        <div class="flex items-start gap-3 text-sm">
+                            <span class="text-green-400 text-lg">✓</span>
+                            <span class="text-gray-300">Feedback Loop: Coder ↔ Reviewer (max 2 iterations)</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm">
-                            <span class="text-green-400">✓</span>
-                            <span class="text-gray-300">Shared State System (MissionContext + Pydantic)</span>
+                        <div class="flex items-start gap-3 text-sm">
+                            <span class="text-green-400 text-lg">✓</span>
+                            <span class="text-gray-300">Shared State System (MissionContext + Pydantic v2)</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm">
-                            <span class="text-green-400">✓</span>
+                        <div class="flex items-start gap-3 text-sm">
+                            <span class="text-green-400 text-lg">✓</span>
                             <span class="text-gray-300">Real-time WebSocket (Flask-SocketIO)</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm">
-                            <span class="text-green-400">✓</span>
-                            <span class="text-gray-300">React + TypeScript UI עם Glassmorphism</span>
+                        <div class="flex items-start gap-3 text-sm">
+                            <span class="text-green-400 text-lg">✓</span>
+                            <span class="text-gray-300">React + TypeScript UI עם Glassmorphism Design</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm">
-                            <span class="text-green-400">✓</span>
-                            <span class="text-gray-300">Exponential Backoff + Auto-reconnect</span>
+                        <div class="flex items-start gap-3 text-sm">
+                            <span class="text-green-400 text-lg">✓</span>
+                            <span class="text-gray-300">Auto-reconnect + Exponential Backoff</span>
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        <span class="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300">Python AsyncIO</span>
-                        <span class="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-full text-xs text-blue-300">React 18</span>
-                        <span class="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full text-xs text-green-300">TypeScript</span>
-                        <span class="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 rounded-full text-xs text-yellow-300">Claude Opus 4.5</span>
-                        <span class="px-3 py-1 bg-pink-500/20 border border-pink-500/30 rounded-full text-xs text-pink-300">Pydantic v2</span>
-                        <span class="px-3 py-1 bg-cyan-500/20 border border-cyan-500/30 rounded-full text-xs text-cyan-300">WebSocket</span>
+                    <!-- Tech Tags -->
+                    <div class="flex flex-wrap gap-2 mb-8">
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-purple-300 border border-purple-500/30 hover:glass-strong transition">Python AsyncIO</span>
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-blue-300 border border-blue-500/30 hover:glass-strong transition">React 18</span>
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-green-300 border border-green-500/30 hover:glass-strong transition">TypeScript</span>
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-yellow-300 border border-yellow-500/30 hover:glass-strong transition">Claude Opus 4.5</span>
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-pink-300 border border-pink-500/30 hover:glass-strong transition">Pydantic v2</span>
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-cyan-300 border border-cyan-500/30 hover:glass-strong transition">WebSocket</span>
                     </div>
 
-                    <div class="flex gap-3">
+                    <!-- Action Buttons -->
+                    <div class="flex gap-4">
                         <a href="https://github.com/mich3333/mich3333/tree/claude/setup-memory-system-rlmis/multi-agent-system"
                            target="_blank"
                            rel="noopener noreferrer"
-                           class="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg font-semibold text-center hover:shadow-lg hover:shadow-purple-500/50 transition-all transform hover:-translate-y-1">
-                            📂 GitHub Repo
+                           class="neon-button flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-bold text-center hover:shadow-xl hover:shadow-purple-500/50 transition-all transform hover:scale-105 relative z-10">
+                            📂 View on GitHub
                         </a>
                         <a href="https://github.com/mich3333/mich3333/blob/claude/setup-memory-system-rlmis/multi-agent-system/IMPLEMENTATION_SUMMARY.md"
                            target="_blank"
                            rel="noopener noreferrer"
-                           class="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg font-semibold text-center hover:bg-white/20 transition-all">
+                           class="flex-1 px-6 py-3 glass-strong rounded-xl font-bold text-center hover:bg-white/20 transition-all transform hover:scale-105">
                             📄 תיעוד
                         </a>
                     </div>
@@ -238,71 +663,92 @@
             </div>
 
             <!-- Project 2: Autonomous Claude -->
-            <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden border border-blue-500/30 hover:border-blue-500 transition-all hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-2">
-                <div class="p-8">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="text-5xl">🤖</div>
-                        <div>
-                            <h3 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent">Autonomous Claude</h3>
-                            <p class="text-sm text-gray-400">Autonomous AI Agent</p>
+            <div class="glass-strong rounded-3xl overflow-hidden border border-blue-500/30 hover:border-blue-500/50 transition-all card-3d reveal">
+                <!-- Project Header with Badge -->
+                <div class="bg-gradient-to-br from-blue-900/30 to-cyan-900/20 p-8 border-b border-blue-500/20">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-4">
+                            <div class="text-6xl">🤖</div>
+                            <div>
+                                <h3 class="text-3xl font-black gradient-text">Autonomous Claude</h3>
+                                <p class="text-sm text-gray-400 mt-1">Autonomous AI Agent</p>
+                            </div>
+                        </div>
+                        <div class="glass px-3 py-1 rounded-full text-xs text-blue-300 border border-blue-500/30">
+                            Live Demo
                         </div>
                     </div>
 
-                    <p class="text-gray-300 mb-6 leading-relaxed">
-                        סוכן AI אוטונומי עם מערכת <strong>Dual Memory</strong> (Short-term + Long-term).
+                    <p class="text-gray-300 leading-relaxed text-lg">
+                        סוכן AI אוטונומי עם מערכת <strong class="text-blue-300">Dual Memory</strong> (Short-term + Long-term).
                         מסוגל לקרוא, לחשוב, לפעול וללמוד באופן עצמאי.
                     </p>
+                </div>
 
-                    <div class="grid grid-cols-3 gap-4 mb-6">
-                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
-                            <div class="text-2xl font-bold text-blue-400">2,680+</div>
-                            <div class="text-xs text-gray-400">שורות קוד</div>
+                <!-- Project Body -->
+                <div class="p-8">
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 gap-4 mb-8">
+                        <div class="glass rounded-xl p-4 text-center hover:glass-strong transition-all transform hover:scale-105">
+                            <div class="text-3xl font-black gradient-text">2,680+</div>
+                            <div class="text-xs text-gray-400 mt-1">שורות קוד</div>
                         </div>
-                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
-                            <div class="text-2xl font-bold text-green-400">SQLite</div>
-                            <div class="text-xs text-gray-400">Memory DB</div>
+                        <div class="glass rounded-xl p-4 text-center hover:glass-strong transition-all transform hover:scale-105">
+                            <div class="text-2xl font-black gradient-text">Dual</div>
+                            <div class="text-xs text-gray-400 mt-1">Memory</div>
                         </div>
-                        <div class="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700">
-                            <div class="text-2xl font-bold text-purple-400">100%</div>
-                            <div class="text-xs text-gray-400">אוטונומי</div>
+                        <div class="glass rounded-xl p-4 text-center hover:glass-strong transition-all transform hover:scale-105">
+                            <div class="text-3xl font-black gradient-text">100%</div>
+                            <div class="text-xs text-gray-400 mt-1">אוטונומי</div>
                         </div>
                     </div>
 
-                    <div class="space-y-2 mb-6">
-                        <div class="flex items-center gap-2 text-sm">
-                            <span class="text-green-400">✓</span>
+                    <!-- Key Features -->
+                    <div class="space-y-3 mb-8">
+                        <div class="flex items-start gap-3 text-sm">
+                            <span class="text-green-400 text-lg">✓</span>
                             <span class="text-gray-300">Decision Loop: READ → THINK → ACT → LEARN</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm">
-                            <span class="text-green-400">✓</span>
+                        <div class="flex items-start gap-3 text-sm">
+                            <span class="text-green-400 text-lg">✓</span>
                             <span class="text-gray-300">Dual Memory System (Short-term + Long-term)</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm">
-                            <span class="text-green-400">✓</span>
-                            <span class="text-gray-300">Claude AI Integration (Anthropic)</span>
+                        <div class="flex items-start gap-3 text-sm">
+                            <span class="text-green-400 text-lg">✓</span>
+                            <span class="text-gray-300">Claude AI Integration (Anthropic API)</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm">
-                            <span class="text-green-400">✓</span>
-                            <span class="text-gray-300">Web Interface עם Figma Integration</span>
+                        <div class="flex items-start gap-3 text-sm">
+                            <span class="text-green-400 text-lg">✓</span>
+                            <span class="text-gray-300">Modern Web Interface + REST API</span>
+                        </div>
+                        <div class="flex items-start gap-3 text-sm">
+                            <span class="text-green-400 text-lg">✓</span>
+                            <span class="text-gray-300">Auto-cleanup & Memory Optimization</span>
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        <span class="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-full text-xs text-blue-300">Python</span>
-                        <span class="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full text-xs text-green-300">Flask</span>
-                        <span class="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300">SQLite</span>
-                        <span class="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 rounded-full text-xs text-yellow-300">Claude AI</span>
-                        <span class="px-3 py-1 bg-pink-500/20 border border-pink-500/30 rounded-full text-xs text-pink-300">TypeScript</span>
+                    <!-- Tech Tags -->
+                    <div class="flex flex-wrap gap-2 mb-8">
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-blue-300 border border-blue-500/30 hover:glass-strong transition">Python</span>
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-green-300 border border-green-500/30 hover:glass-strong transition">Flask</span>
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-purple-300 border border-purple-500/30 hover:glass-strong transition">SQLite</span>
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-pink-300 border border-pink-500/30 hover:glass-strong transition">Qdrant</span>
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-yellow-300 border border-yellow-500/30 hover:glass-strong transition">Claude AI</span>
+                        <span class="glass px-3 py-1.5 rounded-full text-xs text-cyan-300 border border-cyan-500/30 hover:glass-strong transition">TypeScript</span>
                     </div>
 
-                    <div class="flex gap-3">
+                    <!-- Action Buttons -->
+                    <div class="flex gap-4">
                         <a href="/dashboard"
-                           class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg font-semibold text-center hover:shadow-lg hover:shadow-blue-500/50 transition-all transform hover:-translate-y-1">
-                            🚀 Dashboard
+                           class="neon-button flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl font-bold text-center hover:shadow-xl hover:shadow-blue-500/50 transition-all transform hover:scale-105 relative z-10">
+                            🚀 Live Dashboard
                         </a>
-                        <a href="#features"
-                           class="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg font-semibold text-center hover:bg-white/20 transition-all">
-                            📚 תכונות
+                        <a href="https://github.com/mich3333/mich3333/tree/claude/setup-memory-system-rlmis/autonomous-claude"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="flex-1 px-6 py-3 glass-strong rounded-xl font-bold text-center hover:bg-white/20 transition-all transform hover:scale-105">
+                            📂 GitHub
                         </a>
                     </div>
                 </div>
@@ -312,179 +758,260 @@
     </div>
 </section>
 
-<!-- Tech Stack -->
-<section class="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
-    <div class="container mx-auto px-6">
-        <h2 class="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">טכנולוגיות</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div class="bg-gray-900 rounded-xl p-6 text-center border border-gray-700 hover:border-purple-500 transition-all hover:-translate-y-2">
-                <div class="text-5xl mb-3">🐍</div>
-                <div class="font-bold text-lg">Python</div>
-                <div class="text-sm text-gray-400">Backend</div>
-            </div>
-            <div class="bg-gray-900 rounded-xl p-6 text-center border border-gray-700 hover:border-purple-500 transition-all hover:-translate-y-2">
-                <div class="text-5xl mb-3">⚡</div>
-                <div class="font-bold text-lg">Flask</div>
-                <div class="text-sm text-gray-400">Server</div>
-            </div>
-            <div class="bg-gray-900 rounded-xl p-6 text-center border border-gray-700 hover:border-purple-500 transition-all hover:-translate-y-2">
-                <div class="text-5xl mb-3">📘</div>
-                <div class="font-bold text-lg">TypeScript</div>
-                <div class="text-sm text-gray-400">Frontend</div>
-            </div>
-            <div class="bg-gray-900 rounded-xl p-6 text-center border border-gray-700 hover:border-purple-500 transition-all hover:-translate-y-2">
-                <div class="text-5xl mb-3">🎨</div>
-                <div class="font-bold text-lg">Tailwind</div>
-                <div class="text-sm text-gray-400">CSS</div>
-            </div>
-            <div class="bg-gray-900 rounded-xl p-6 text-center border border-gray-700 hover:border-purple-500 transition-all hover:-translate-y-2">
-                <div class="text-5xl mb-3">🗄️</div>
-                <div class="font-bold text-lg">SQLite</div>
-                <div class="text-sm text-gray-400">Memory</div>
-            </div>
-            <div class="bg-gray-900 rounded-xl p-6 text-center border border-gray-700 hover:border-purple-500 transition-all hover:-translate-y-2">
-                <div class="text-5xl mb-3">🔍</div>
-                <div class="font-bold text-lg">Qdrant</div>
-                <div class="text-sm text-gray-400">Vector DB</div>
-            </div>
-            <div class="bg-gray-900 rounded-xl p-6 text-center border border-gray-700 hover:border-purple-500 transition-all hover:-translate-y-2">
-                <div class="text-5xl mb-3">🤖</div>
-                <div class="font-bold text-lg">Anthropic</div>
-                <div class="text-sm text-gray-400">Claude Opus 4.5</div>
-            </div>
-            <div class="bg-gray-900 rounded-xl p-6 text-center border border-gray-700 hover:border-purple-500 transition-all hover:-translate-y-2">
-                <div class="text-5xl mb-3">🔄</div>
-                <div class="font-bold text-lg">REST API</div>
-                <div class="text-sm text-gray-400">Integration</div>
-            </div>
-        </div>
+<!-- Contact Section -->
+<section id="contact" class="py-32 bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl opacity-10 glow-animation"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500 rounded-full filter blur-3xl opacity-10 glow-animation" style="animation-delay: 2s;"></div>
     </div>
-</section>
 
-<!-- Workflow -->
-<section class="py-20 bg-gray-900">
-    <div class="container mx-auto px-6">
-        <h2 class="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">איך זה עובד?</h2>
-        <div class="flex flex-wrap justify-center items-center gap-4">
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 text-center hover:border-purple-500 transition-all">
-                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-3">1</div>
-                <h3 class="font-bold text-lg mb-2">📖 READ</h3>
-                <p class="text-sm text-gray-400">קריאה</p>
-            </div>
-            <div class="text-3xl text-purple-400">→</div>
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 text-center hover:border-purple-500 transition-all">
-                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-3">2</div>
-                <h3 class="font-bold text-lg mb-2">🔍 QUERY</h3>
-                <p class="text-sm text-gray-400">חיפוש</p>
-            </div>
-            <div class="text-3xl text-purple-400">→</div>
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 text-center hover:border-purple-500 transition-all">
-                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-3">3</div>
-                <h3 class="font-bold text-lg mb-2">💭 THINK</h3>
-                <p class="text-sm text-gray-400">חשיבה</p>
-            </div>
-            <div class="text-3xl text-purple-400">→</div>
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 text-center hover:border-purple-500 transition-all">
-                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-3">4</div>
-                <h3 class="font-bold text-lg mb-2">⚡ ACT</h3>
-                <p class="text-sm text-gray-400">פעולה</p>
-            </div>
-            <div class="text-3xl text-purple-400">→</div>
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 text-center hover:border-purple-500 transition-all">
-                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-3">5</div>
-                <h3 class="font-bold text-lg mb-2">📝 RECORD</h3>
-                <p class="text-sm text-gray-400">תיעוד</p>
-            </div>
-            <div class="text-3xl text-purple-400">→</div>
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 text-center hover:border-purple-500 transition-all">
-                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-3">6</div>
-                <h3 class="font-bold text-lg mb-2">🎓 LEARN</h3>
-                <p class="text-sm text-gray-400">למידה</p>
-            </div>
+    <div class="container mx-auto px-6 relative z-10">
+        <div class="text-center mb-20 reveal">
+            <h2 class="text-6xl font-black mb-6">
+                <span class="gradient-text">בואו נדבר</span>
+            </h2>
+            <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                מעוניין בפרויקט משותף, יש שאלות, או רק רוצה לשוחח על AI?<br>
+                אשמח לשמוע ממך!
+            </p>
         </div>
-    </div>
-</section>
 
-<!-- Stats -->
-<section class="py-20 bg-gradient-to-b from-gray-900 to-purple-900">
-    <div class="container mx-auto px-6">
-        <div class="grid md:grid-cols-4 gap-8 text-center">
-            <div class="bg-gray-900/50 rounded-xl p-8 border border-purple-500/30">
-                <div class="text-5xl mb-3">📝</div>
-                <div class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent mb-2">2,680+</div>
-                <div class="text-gray-400">Lines of Code</div>
-            </div>
-            <div class="bg-gray-900/50 rounded-xl p-8 border border-purple-500/30">
-                <div class="text-5xl mb-3">📦</div>
-                <div class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent mb-2">11</div>
-                <div class="text-gray-400">Core Modules</div>
-            </div>
-            <div class="bg-gray-900/50 rounded-xl p-8 border border-purple-500/30">
-                <div class="text-5xl mb-3">🔌</div>
-                <div class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent mb-2">12+</div>
-                <div class="text-gray-400">API Endpoints</div>
-            </div>
-            <div class="bg-gray-900/50 rounded-xl p-8 border border-purple-500/30">
-                <div class="text-5xl mb-3">⚡</div>
-                <div class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent mb-2">3s</div>
-                <div class="text-gray-400">Refresh Rate</div>
-            </div>
-        </div>
-    </div>
-</section>
+        <div class="max-w-4xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Email -->
+                <a href="mailto:your.email@example.com" class="glass-strong rounded-3xl p-8 reveal card-3d hover:shadow-2xl hover:shadow-purple-500/20 transition-all group">
+                    <div class="flex items-center gap-6">
+                        <div class="text-6xl group-hover:scale-110 transition-transform">📧</div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2 gradient-text">Email</h3>
+                            <p class="text-gray-400">your.email@example.com</p>
+                        </div>
+                    </div>
+                </a>
 
-<!-- CTA -->
-<section class="py-20 bg-gradient-to-br from-purple-900 via-pink-900 to-gray-900 text-center">
-    <div class="container mx-auto px-6">
-        <h2 class="text-5xl font-bold mb-6">מוכן להתחיל?</h2>
-        <p class="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">גש ל-Dashboard ותתחיל לעבוד עם הסוכן</p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/dashboard" class="px-10 py-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg font-bold text-lg hover:shadow-xl hover:shadow-purple-500/50 transition-all transform hover:-translate-y-1">
-                🚀 פתח Dashboard
-            </a>
-            <a href="https://github.com" class="px-10 py-5 bg-white/10 border border-white/20 rounded-lg font-bold text-lg hover:bg-white/20 transition-all">
-                💻 GitHub
-            </a>
+                <!-- GitHub -->
+                <a href="https://github.com/mich3333" target="_blank" rel="noopener noreferrer" class="glass-strong rounded-3xl p-8 reveal card-3d hover:shadow-2xl hover:shadow-blue-500/20 transition-all group">
+                    <div class="flex items-center gap-6">
+                        <div class="text-6xl group-hover:scale-110 transition-transform">💻</div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2 gradient-text">GitHub</h3>
+                            <p class="text-gray-400">@mich3333</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- LinkedIn (optional) -->
+                <a href="#" class="glass-strong rounded-3xl p-8 reveal card-3d hover:shadow-2xl hover:shadow-pink-500/20 transition-all group">
+                    <div class="flex items-center gap-6">
+                        <div class="text-6xl group-hover:scale-110 transition-transform">💼</div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2 gradient-text">LinkedIn</h3>
+                            <p class="text-gray-400">Michel Dabah</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Discord/Telegram (optional) -->
+                <a href="#" class="glass-strong rounded-3xl p-8 reveal card-3d hover:shadow-2xl hover:shadow-green-500/20 transition-all group">
+                    <div class="flex items-center gap-6">
+                        <div class="text-6xl group-hover:scale-110 transition-transform">💬</div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2 gradient-text">Discord</h3>
+                            <p class="text-gray-400">בקרוב...</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- CTA -->
+            <div class="text-center glass-strong rounded-3xl p-12 reveal">
+                <h3 class="text-3xl font-bold mb-4 gradient-text">מוכן להתחיל?</h3>
+                <p class="text-gray-400 mb-8 text-lg">גש ל-Dashboard ותתנסה במערכות שפיתחתי</p>
+                <a href="/dashboard" class="neon-button inline-block px-12 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all transform hover:scale-105 relative z-10">
+                    🚀 פתח Dashboard
+                </a>
+            </div>
         </div>
     </div>
 </section>
 
 <!-- Footer -->
-<footer class="bg-gray-900 border-t border-gray-800 py-12">
+<footer class="bg-black border-t border-gray-800 py-16">
     <div class="container mx-auto px-6">
-        <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div class="grid md:grid-cols-4 gap-12 mb-12">
+            <!-- Brand -->
             <div>
-                <h3 class="text-xl font-bold mb-4">🤖 Autonomous Claude</h3>
-                <p class="text-gray-400">מערכת AI אוטונומית</p>
+                <h3 class="text-2xl font-black mb-4 gradient-text">Michel Dabah</h3>
+                <p class="text-gray-400 leading-relaxed">
+                    AI Engineer & Full Stack Developer<br>
+                    בונה מערכות אינטליגנטיות
+                </p>
             </div>
+
+            <!-- Quick Links -->
             <div>
-                <h4 class="font-bold mb-4">קישורים</h4>
-                <ul class="space-y-2">
-                    <li><a href="/dashboard" class="text-gray-400 hover:text-purple-400 transition">Dashboard</a></li>
-                    <li><a href="/api/status" class="text-gray-400 hover:text-purple-400 transition">API</a></li>
+                <h4 class="font-bold mb-4 text-lg">קישורים מהירים</h4>
+                <ul class="space-y-3">
+                    <li><a href="#about" class="text-gray-400 hover:text-purple-400 transition">אודות</a></li>
+                    <li><a href="#skills" class="text-gray-400 hover:text-purple-400 transition">מיומנויות</a></li>
+                    <li><a href="#projects" class="text-gray-400 hover:text-purple-400 transition">פרויקטים</a></li>
+                    <li><a href="#contact" class="text-gray-400 hover:text-purple-400 transition">צור קשר</a></li>
                 </ul>
             </div>
+
+            <!-- Projects -->
             <div>
-                <h4 class="font-bold mb-4">טכנולוגיות</h4>
-                <ul class="space-y-2 text-gray-400">
-                    <li>Python + Flask</li>
-                    <li>TypeScript</li>
-                    <li>Tailwind CSS</li>
+                <h4 class="font-bold mb-4 text-lg">הפרויקטים שלי</h4>
+                <ul class="space-y-3">
+                    <li><a href="https://github.com/mich3333/mich3333/tree/claude/setup-memory-system-rlmis/multi-agent-system" target="_blank" class="text-gray-400 hover:text-purple-400 transition">AgentHub</a></li>
+                    <li><a href="/dashboard" class="text-gray-400 hover:text-purple-400 transition">Autonomous Claude</a></li>
+                    <li><a href="https://github.com/mich3333" target="_blank" class="text-gray-400 hover:text-purple-400 transition">GitHub Profile</a></li>
                 </ul>
             </div>
+
+            <!-- Social & Tech -->
             <div>
-                <h4 class="font-bold mb-4">מסמכים</h4>
-                <ul class="space-y-2">
-                    <li><a href="#" class="text-gray-400 hover:text-purple-400 transition">Docs</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-purple-400 transition">API</a></li>
-                </ul>
+                <h4 class="font-bold mb-4 text-lg">טכנולוגיות מרכזיות</h4>
+                <div class="flex flex-wrap gap-2">
+                    <span class="glass px-2 py-1 rounded text-xs text-gray-400">Python</span>
+                    <span class="glass px-2 py-1 rounded text-xs text-gray-400">React</span>
+                    <span class="glass px-2 py-1 rounded text-xs text-gray-400">TypeScript</span>
+                    <span class="glass px-2 py-1 rounded text-xs text-gray-400">Claude AI</span>
+                    <span class="glass px-2 py-1 rounded text-xs text-gray-400">Flask</span>
+                    <span class="glass px-2 py-1 rounded text-xs text-gray-400">Tailwind</span>
+                </div>
             </div>
         </div>
+
         <div class="border-t border-gray-800 pt-8 text-center text-gray-400">
-            <p>Made with ❤️ using Claude & Tailwind • 2025</p>
+            <p class="text-sm">
+                Made with <span class="text-red-500 animate-pulse">♥</span> using
+                <span class="text-purple-400 font-semibold">Claude AI</span> &
+                <span class="text-cyan-400 font-semibold">Tailwind CSS</span>
+            </p>
+            <p class="text-xs mt-2 text-gray-500">© 2025 Michel Dabah. All rights reserved.</p>
         </div>
     </div>
 </footer>
+
+<!-- JavaScript for Animations -->
+<script>
+    // Particles Canvas Animation
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    const particleCount = 80;
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 1;
+            this.speedX = Math.random() * 0.5 - 0.25;
+            this.speedY = Math.random() * 0.5 - 0.25;
+            this.opacity = Math.random() * 0.5 + 0.2;
+        }
+
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+
+            if (this.x > canvas.width) this.x = 0;
+            if (this.x < 0) this.x = canvas.width;
+            if (this.y > canvas.height) this.y = 0;
+            if (this.y < 0) this.y = canvas.height;
+        }
+
+        draw() {
+            ctx.fillStyle = `rgba(139, 92, 246, ${this.opacity})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function init() {
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update();
+            particles[i].draw();
+
+            // Draw connections
+            for (let j = i; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 100) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(139, 92, 246, ${0.1 * (1 - distance / 100)})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    init();
+    animate();
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+
+    // Reveal on Scroll Animation
+    const revealElements = document.querySelectorAll('.reveal');
+
+    const revealOnScroll = () => {
+        const triggerBottom = window.innerHeight * 0.85;
+
+        revealElements.forEach(element => {
+            const elementTop = element.getBoundingClientRect().top;
+
+            if (elementTop < triggerBottom) {
+                element.classList.add('active');
+            }
+        });
+    };
+
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll(); // Initial check
+
+    // Skill Bars Animation
+    const animateSkillBars = () => {
+        const skillBars = document.querySelectorAll('.skill-bar');
+        const triggerBottom = window.innerHeight * 0.85;
+
+        skillBars.forEach(bar => {
+            const barTop = bar.getBoundingClientRect().top;
+
+            if (barTop < triggerBottom && !bar.classList.contains('animate')) {
+                bar.classList.add('animate');
+            }
+        });
+    };
+
+    window.addEventListener('scroll', animateSkillBars);
+    animateSkillBars(); // Initial check
+</script>
 
 </body>
 </html>
