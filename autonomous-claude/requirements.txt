@@ -24,7 +24,7 @@ sentence-transformers>=2.2.0
 anthropic>=0.39.0
 
 # Web Interface
-Flask>=3.0.0
+Flask>=3.1.2
 Flask-CORS>=4.0.0
 Flask-Compress>=1.14  # Gzip compression for faster mobile loading
 
