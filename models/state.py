@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AgentStatus(str, Enum):
@@ -34,9 +34,6 @@ class AgentLog(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     thought_process: str | None = None  # Internal reasoning
     output: str | None = None  # Actual deliverable
-
-    class Config:
-        json_encoders = {datetime: lambda v: v.isoformat()}
 
 
 class SharedFindings(BaseModel):
@@ -80,9 +77,6 @@ class MissionContext(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     completed_at: datetime | None = None
-
-    class Config:
-        json_encoders = {datetime: lambda v: v.isoformat()}
 
     def add_log(
         self,
