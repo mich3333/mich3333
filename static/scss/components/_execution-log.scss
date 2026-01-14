@@ -1,0 +1,94 @@
+// ========================================
+// Execution Log
+// ========================================
+
+.execution-card {
+  min-height: 400px;
+}
+
+.execution-log {
+  max-height: 500px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.log-entry {
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid $primary;
+  border-radius: $radius-sm;
+  padding: $spacing-md;
+  @include animation(slideInRight, 0.3s, ease, 1);
+
+  &.manager {
+    border-left-color: $color-manager;
+  }
+
+  &.researcher {
+    border-left-color: $color-researcher;
+  }
+
+  &.coder {
+    border-left-color: $color-coder;
+  }
+
+  &.reviewer {
+    border-left-color: $color-reviewer;
+  }
+
+  &.reporter {
+    border-left-color: $color-reporter;
+  }
+}
+
+.log-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+  font-weight: 600;
+}
+
+.log-status {
+  display: inline-block;
+  padding: 2px $spacing-sm;
+  border-radius: $radius-md;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+
+  &.working {
+    background: rgba(251, 191, 36, 0.2);
+    color: $warning;
+  }
+
+  &.completed {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+  }
+
+  &.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+}
+
+.log-message {
+  font-size: 0.9rem;
+  color: #d0d0d0;
+  white-space: pre-wrap;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

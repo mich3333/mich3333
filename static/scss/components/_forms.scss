@@ -1,0 +1,26 @@
+// ========================================
+// Forms & Inputs
+// ========================================
+
+#taskInput {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  color: $text;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: all $transition-base ease;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  &::placeholder {
+    color: $text-muted;
+  }
+}

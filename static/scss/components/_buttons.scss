@@ -1,0 +1,31 @@
+// ========================================
+// Buttons
+// ========================================
+
+.btn {
+  padding: 14px 28px;
+  border: none;
+  border-radius: $radius-md;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-base ease;
+  margin-top: $spacing-lg;
+  width: 100%;
+
+  &-primary {
+    background: $gradient-primary;
+    color: white;
+    @include hover-lift(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}

@@ -1,0 +1,41 @@
+// ========================================
+// Results Components
+// ========================================
+
+.results-card {
+  min-height: 300px;
+}
+
+.results {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.result-section {
+  margin-bottom: $spacing-2xl;
+
+  h3 {
+    color: $primary;
+    margin-bottom: $spacing-md;
+  }
+}
+
+.result-content {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: $radius-sm;
+  padding: $spacing-lg;
+  white-space: pre-wrap;
+  font-family: $font-family-mono;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px $spacing-xl;
+  color: $text-muted;
+  font-size: 1rem;
+}

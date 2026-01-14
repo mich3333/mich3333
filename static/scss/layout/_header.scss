@@ -1,0 +1,70 @@
+// ========================================
+// Header
+// ========================================
+
+.header {
+  text-align: center;
+  margin-bottom: $spacing-4xl;
+  @include animation(fadeInDown, 0.6s, ease, 1);
+
+  h1 {
+    font-size: 3rem;
+    @include text-gradient($gradient-primary);
+    margin-bottom: 10px;
+
+    @include mobile {
+      font-size: 2rem;
+    }
+  }
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: $text-secondary;
+  margin-bottom: $spacing-xl;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-lg;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: $radius-xl;
+  backdrop-filter: blur(10px);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-round;
+  background: $success;
+  @include animation(pulse, 2s);
+
+  &.offline {
+    background: $danger;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}

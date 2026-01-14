@@ -1,0 +1,24 @@
+// ========================================
+// Main Layout
+// ========================================
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-3xl;
+
+  @include tablet {
+    grid-template-columns: 1fr;
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
