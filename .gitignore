@@ -29,3 +29,6 @@ ENV/
 dist/
 build/
 *.egg-info/
+
+# Separate git repositories
+multi-agent-system/
