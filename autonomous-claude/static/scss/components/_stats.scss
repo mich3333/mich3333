@@ -1,0 +1,32 @@
+// ========================================
+// Stats Components
+// ========================================
+
+.hero-stats {
+  @include grid-columns(3);
+
+  @include tablet {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5em;
+  font-weight: $font-weight-extrabold;
+  @include text-gradient($gradient-success);
+}
+
+.stat-label {
+  color: $text-secondary;
+  font-size: $font-size-small;
+  margin-top: $spacing-xs;
+}
+
+.stats-grid {
+  @include grid-auto-fit(250px);
+}

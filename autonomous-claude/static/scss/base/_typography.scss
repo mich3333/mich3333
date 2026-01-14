@@ -1,0 +1,15 @@
+// ========================================
+// Typography
+// ========================================
+
+.section-title {
+  text-align: center;
+  font-size: 3em;
+  margin-bottom: $spacing-5xl;
+  @include text-gradient($gradient-primary);
+}
+
+.subtitle {
+  color: $text-secondary;
+  font-size: $font-size-large;
+}

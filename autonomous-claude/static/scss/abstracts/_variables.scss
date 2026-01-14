@@ -1,0 +1,100 @@
+// ========================================
+// Variables - Design Tokens
+// ========================================
+
+// Colors - Primary Palette
+$primary: #6366f1;
+$primary-dark: #4f46e5;
+$secondary: #8b5cf6;
+$success: #10b981;
+
+// Colors - Background
+$bg-dark: #0f172a;
+$bg-card: #1e293b;
+
+// Colors - Text
+$text: #f1f5f9;
+$text-secondary: #94a3b8;
+
+// Colors - Borders
+$border: #334155;
+
+// Gradients
+$gradient-primary: linear-gradient(135deg, $primary 0%, $secondary 100%);
+$gradient-success: linear-gradient(135deg, $success 0%, #3b82f6 100%);
+$gradient-dark: linear-gradient(135deg, $bg-dark 0%, $bg-card 50%, $bg-dark 100%);
+$gradient-hero-bg: linear-gradient(135deg, $bg-dark 0%, $bg-card 50%, $bg-dark 100%);
+$gradient-cta: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+$gradient-stats: linear-gradient(135deg, $bg-card 0%, $bg-dark 100%);
+
+// Typography
+$font-family-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+$font-family-mono: 'Courier New', monospace;
+
+$font-size-base: 1rem;
+$font-size-small: 0.9rem;
+$font-size-smaller: 0.85rem;
+$font-size-large: 1.1rem;
+$font-size-xlarge: 1.2rem;
+
+// Font Weights
+$font-weight-normal: 400;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-extrabold: 800;
+
+// Line Heights
+$line-height-base: 1.6;
+$line-height-tight: 1.2;
+$line-height-relaxed: 1.8;
+
+// Spacing
+$spacing-xs: 5px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 20px;
+$spacing-2xl: 24px;
+$spacing-3xl: 30px;
+$spacing-4xl: 40px;
+$spacing-5xl: 60px;
+$spacing-6xl: 80px;
+$spacing-7xl: 100px;
+
+// Border Radius
+$radius-sm: 8px;
+$radius-md: 10px;
+$radius-lg: 12px;
+$radius-xl: 16px;
+$radius-2xl: 20px;
+$radius-round: 50%;
+
+// Shadows
+$shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.3);
+$shadow-md: 0 10px 25px rgba(99, 102, 241, 0.4);
+$shadow-lg: 0 20px 40px rgba(99, 102, 241, 0.2);
+$shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+// Transitions
+$transition-fast: 0.2s;
+$transition-base: 0.3s;
+$transition-slow: 0.5s;
+
+// Breakpoints
+$breakpoint-mobile: 768px;
+$breakpoint-tablet: 1024px;
+$breakpoint-desktop: 1200px;
+
+// Z-index layers
+$z-index-base: 1;
+$z-index-dropdown: 100;
+$z-index-modal: 1000;
+$z-index-tooltip: 2000;
+
+// Container
+$container-max-width: 1200px;
+$container-padding: 20px;
+
+// Grid
+$grid-gap: 30px;
+$grid-gap-small: 20px;

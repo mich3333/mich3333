@@ -1,0 +1,50 @@
+// ========================================
+// Autonomous Claude - Portfolio
+// Main SCSS Entry Point
+// ========================================
+// Professional Sass Architecture (7-1 Pattern)
+// Compile this file to generate portfolio.css
+
+// ============================================
+// 1. ABSTRACTS - Variables, Functions, Mixins
+// ============================================
+@import 'abstracts/variables';
+@import 'abstracts/functions';
+@import 'abstracts/mixins';
+
+// ============================================
+// 2. BASE - Reset, Typography, Base Styles
+// ============================================
+@import 'base/reset';
+@import 'base/typography';
+
+// ============================================
+// 3. LAYOUT - Major Layout Components
+// ============================================
+@import 'layout/container';
+@import 'layout/hero';
+@import 'layout/features';
+@import 'layout/tech-stack';
+@import 'layout/workflow';
+@import 'layout/stats';
+@import 'layout/cta';
+@import 'layout/footer';
+
+// ============================================
+// 4. COMPONENTS - Reusable UI Components
+// ============================================
+@import 'components/buttons';
+@import 'components/badges';
+@import 'components/cards';
+@import 'components/stats';
+@import 'components/code-window';
+
+// ============================================
+// 5. PAGES - Page-Specific Styles (if needed)
+// ============================================
+// Add page-specific styles here if needed
+
+// ============================================
+// 6. UTILITIES - Helper Classes (if needed)
+// ============================================
+// Add utility classes here if needed

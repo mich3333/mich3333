@@ -1,0 +1,12 @@
+// ========================================
+// Features Section
+// ========================================
+
+.features {
+  padding: $spacing-7xl 0;
+  background: $bg-dark;
+}
+
+.features-grid {
+  @include grid-auto-fit(350px);
+}

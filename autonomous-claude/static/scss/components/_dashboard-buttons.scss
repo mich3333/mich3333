@@ -1,0 +1,107 @@
+// ========================================
+// Dashboard Buttons & Button Groups
+// ========================================
+
+.btn {
+  padding: $spacing-md $spacing-2xl;
+  border: none;
+  border-radius: $radius-sm;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: all $transition-fast;
+  width: 100%;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &-primary {
+    background: $primary;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: $primary-dark;
+    }
+  }
+
+  &-success {
+    background: $success;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken-color($success, 10%);
+    }
+  }
+
+  &-danger {
+    background: #ef4444;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: #dc2626;
+    }
+  }
+
+  &-warning {
+    background: #f59e0b;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: #d97706;
+    }
+  }
+
+  &-secondary {
+    background: $text-secondary;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken-color($text-secondary, 10%);
+    }
+  }
+}
+
+// Button Groups
+.button-group {
+  @include grid-columns(2);
+  gap: $spacing-md;
+}
+
+.button-group-vertical {
+  @include flex-column;
+  gap: $spacing-md;
+}
+
+// Filter Buttons
+.filter-buttons {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 6px $spacing-md;
+  background: alpha($primary, 0.1);
+  border: 1px solid alpha($primary, 0.3);
+  border-radius: 6px;
+  color: $text;
+  cursor: pointer;
+  font-size: $font-size-small;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: alpha($primary, 0.2);
+  }
+
+  &.active {
+    background: $primary;
+    border-color: $primary;
+  }
+}

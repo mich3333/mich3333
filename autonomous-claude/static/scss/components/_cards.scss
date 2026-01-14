@@ -1,0 +1,148 @@
+// ========================================
+// Cards
+// ========================================
+
+.feature-card {
+  @include card($spacing-4xl);
+  @include hover-lift(-10px, $shadow-lg);
+
+  &:hover {
+    border-color: $primary;
+  }
+
+  h3 {
+    font-size: 1.6em;
+    margin-bottom: $spacing-lg;
+    color: $text;
+  }
+
+  p {
+    color: $text-secondary;
+    margin-bottom: $spacing-xl;
+    line-height: $line-height-relaxed;
+  }
+}
+
+.feature-icon {
+  font-size: 3em;
+  margin-bottom: $spacing-xl;
+}
+
+.feature-list {
+  @include reset-list;
+
+  li {
+    padding: $spacing-sm 0;
+    padding-right: $spacing-2xl;
+    position: relative;
+    color: $text-secondary;
+
+    &::before {
+      @include pseudo('✓');
+      @include absolute(null, 0, null, null);
+      color: $success;
+      font-weight: bold;
+    }
+  }
+}
+
+// Tech Stack Cards
+.tech-item {
+  background: $bg-dark;
+  padding: $spacing-3xl $spacing-xl;
+  border-radius: $radius-lg;
+  text-align: center;
+  border: 1px solid $border;
+  transition: all $transition-base;
+
+  &:hover {
+    transform: translateY(-5px);
+    border-color: $primary;
+    box-shadow: 0 10px 30px alpha($primary, 0.2);
+  }
+}
+
+.tech-logo {
+  font-size: 3em;
+  margin-bottom: $spacing-md;
+}
+
+.tech-name {
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-large;
+  margin-bottom: $spacing-sm;
+}
+
+.tech-desc {
+  font-size: $font-size-smaller;
+  color: $text-secondary;
+}
+
+// Stat Cards
+.stat-card {
+  background: $bg-dark;
+  padding: $spacing-4xl;
+  border-radius: $radius-xl;
+  text-align: center;
+  border: 1px solid $border;
+  transition: all $transition-base;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px alpha($primary, 0.3);
+  }
+
+  .stat-icon {
+    font-size: 3em;
+    margin-bottom: $spacing-xl;
+  }
+
+  .stat-value {
+    font-size: 3em;
+    font-weight: $font-weight-extrabold;
+    @include text-gradient($gradient-primary);
+    margin-bottom: 10px;
+  }
+
+  .stat-label {
+    color: $text-secondary;
+    font-size: $font-size-large;
+  }
+}
+
+// Workflow Steps
+.workflow-step {
+  background: $bg-card;
+  padding: $spacing-3xl;
+  border-radius: $radius-lg;
+  border: 2px solid $border;
+  min-width: 180px;
+  text-align: center;
+  transition: all $transition-base;
+
+  &:hover {
+    border-color: $primary;
+    transform: scale(1.05);
+  }
+}
+
+.step-number {
+  @include circle(50px);
+  @include flex-center;
+  background: $gradient-primary;
+  font-size: 1.5em;
+  font-weight: $font-weight-extrabold;
+  margin: 0 auto $spacing-xl;
+}
+
+.step-content {
+  h3 {
+    margin-bottom: $spacing-md;
+    font-size: 1.3em;
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: $font-size-small;
+  }
+}

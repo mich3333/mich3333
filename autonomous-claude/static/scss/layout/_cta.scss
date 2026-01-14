@@ -1,0 +1,20 @@
+// ========================================
+// Call To Action Section
+// ========================================
+
+.cta {
+  padding: $spacing-7xl 0;
+  text-align: center;
+  background: $gradient-cta;
+
+  h2 {
+    font-size: 3em;
+    margin-bottom: $spacing-xl;
+  }
+
+  p {
+    font-size: 1.3em;
+    color: $text-secondary;
+    margin-bottom: $spacing-4xl;
+  }
+}

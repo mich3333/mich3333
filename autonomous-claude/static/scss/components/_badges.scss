@@ -1,0 +1,13 @@
+// ========================================
+// Badges
+// ========================================
+
+.hero-badge {
+  display: inline-block;
+  padding: $spacing-sm $spacing-lg;
+  background: alpha($primary, 0.2);
+  border: 1px solid alpha($primary, 0.3);
+  border-radius: $radius-2xl;
+  font-size: $font-size-small;
+  margin-bottom: $spacing-xl;
+}

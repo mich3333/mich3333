@@ -1,34 +1,31 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-.venv/
+# Node modules
+node_modules/
 
-# Autonomous Claude data (don't commit runtime data)
-autonomous-claude/data/
-autonomous-claude/**/*.db
-autonomous-claude/**/*.db-journal
-data/
+# Sass cache
+.sass-cache/
+*.css.map
 
-# Screenshots (optional - uncomment to exclude)
-# autonomous-claude/data/screenshots/
+# OS files
+.DS_Store
+Thumbs.db
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
-# OS
-.DS_Store
-Thumbs.db
-*.tar.gz
-*.zip
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
 
-# Multi-Agent System (separate git repo)
-multi-agent-system/
+# Distribution
+dist/
+build/
+*.egg-info/

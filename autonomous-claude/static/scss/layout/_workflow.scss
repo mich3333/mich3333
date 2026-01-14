@@ -1,0 +1,27 @@
+// ========================================
+// How It Works / Workflow Section
+// ========================================
+
+.how-it-works {
+  padding: $spacing-7xl 0;
+  background: $bg-dark;
+}
+
+.workflow {
+  @include flex-center;
+  flex-wrap: wrap;
+  gap: $spacing-xl;
+
+  @include mobile {
+    flex-direction: column;
+  }
+}
+
+.workflow-arrow {
+  font-size: 2em;
+  color: $primary;
+
+  @include mobile {
+    transform: rotate(90deg);
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "mich3333-sass-compilation",
+  "version": "1.0.0",
+  "description": "Professional Sass compilation for mich3333 projects",
+  "scripts": {
+    "sass:portfolio": "sass autonomous-claude/static/scss/portfolio.scss autonomous-claude/static/css/portfolio.css --style compressed --no-source-map",
+    "sass:dashboard": "sass autonomous-claude/static/scss/dashboard.scss autonomous-claude/static/css/style.css --style compressed --no-source-map",
+    "sass:multi-agent": "sass multi-agent-system/static/scss/multi-agent.scss multi-agent-system/static/css/style.css --style compressed --no-source-map",
+    "sass:build": "npm run sass:portfolio && npm run sass:dashboard && npm run sass:multi-agent",
+    "sass:watch:portfolio": "sass autonomous-claude/static/scss/portfolio.scss autonomous-claude/static/css/portfolio.css --watch --style expanded --source-map",
+    "sass:watch:dashboard": "sass autonomous-claude/static/scss/dashboard.scss autonomous-claude/static/css/style.css --watch --style expanded --source-map",
+    "sass:watch:multi-agent": "sass multi-agent-system/static/scss/multi-agent.scss multi-agent-system/static/css/style.css --watch --style expanded --source-map",
+    "sass:dev": "npm run sass:watch:portfolio & npm run sass:watch:dashboard & npm run sass:watch:multi-agent",
+    "sass:lint": "echo 'Running Sass linting...' && sass-lint -v -q",
+    "prebuild": "npm run sass:build"
+  },
+  "devDependencies": {
+    "sass": "^1.70.0"
+  },
+  "keywords": [
+    "sass",
+    "scss",
+    "css",
+    "compilation"
+  ],
+  "author": "mich3333",
+  "license": "MIT"
+}

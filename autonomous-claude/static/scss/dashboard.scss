@@ -1,0 +1,40 @@
+// ========================================
+// Autonomous Claude - Dashboard
+// Main SCSS Entry Point
+// ========================================
+// Professional Sass Architecture
+// Compile this file to generate style.css
+
+// ============================================
+// 1. ABSTRACTS - Variables, Functions, Mixins
+// ============================================
+@import 'abstracts/variables';
+@import 'abstracts/functions';
+@import 'abstracts/mixins';
+
+// ============================================
+// 2. BASE - Reset, Typography, Base Styles
+// ============================================
+@import 'base/reset';
+@import 'base/typography';
+
+// ============================================
+// 3. LAYOUT - Major Layout Components
+// ============================================
+@import 'layout/container';
+@import 'layout/dashboard-header';
+@import 'layout/dashboard-layout';
+
+// ============================================
+// 4. COMPONENTS - Reusable UI Components
+// ============================================
+@import 'components/dashboard-buttons';
+@import 'components/dashboard-cards';
+@import 'components/dashboard-stats';
+@import 'components/forms';
+@import 'components/toast';
+
+// ============================================
+// 5. RESPONSIVE - Media Queries
+// ============================================
+// Additional responsive styles are handled in component files

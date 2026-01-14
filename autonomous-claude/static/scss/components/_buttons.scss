@@ -1,0 +1,40 @@
+// ========================================
+// Buttons
+// ========================================
+
+.btn {
+  @include button-base;
+
+  &-primary {
+    @include button-gradient($gradient-primary);
+  }
+
+  &-secondary {
+    @include button-outline($primary);
+  }
+
+  &-large {
+    padding: 18px 40px;
+    font-size: $font-size-xlarge;
+  }
+}
+
+.hero-buttons {
+  display: flex;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-5xl;
+
+  @include mobile {
+    flex-direction: column;
+  }
+}
+
+.cta-buttons {
+  @include flex-center;
+  gap: $spacing-xl;
+
+  @include mobile {
+    flex-direction: column;
+    align-items: center;
+  }
+}

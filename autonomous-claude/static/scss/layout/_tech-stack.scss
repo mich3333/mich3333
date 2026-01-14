@@ -1,0 +1,13 @@
+// ========================================
+// Tech Stack Section
+// ========================================
+
+.tech-stack {
+  padding: $spacing-7xl 0;
+  background: linear-gradient(180deg, $bg-dark 0%, $bg-card 100%);
+}
+
+.tech-grid {
+  @include grid-auto-fit(140px);
+  gap: $spacing-xl;
+}

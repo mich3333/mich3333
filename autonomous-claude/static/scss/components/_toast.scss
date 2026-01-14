@@ -1,0 +1,53 @@
+// ========================================
+// Toast Notifications
+// ========================================
+
+.toast-container {
+  position: fixed;
+  bottom: $spacing-xl;
+  left: $spacing-xl;
+  @include flex-column;
+  gap: $spacing-md;
+  z-index: z('modal');
+}
+
+.toast {
+  padding: $spacing-lg $spacing-xl;
+  background: $bg-card;
+  border-radius: $radius-sm;
+  border: 1px solid $border;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  min-width: 300px;
+  animation: slideIn 0.3s ease-out;
+
+  &.success {
+    border-right: 4px solid $success;
+  }
+
+  &.error {
+    border-right: 4px solid #ef4444;
+  }
+
+  &.info {
+    border-right: 4px solid $primary;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// Loading Animation
+.loading {
+  text-align: center;
+  padding: $spacing-xl;
+  color: $text-secondary;
+}

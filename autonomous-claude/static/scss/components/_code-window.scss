@@ -1,0 +1,73 @@
+// ========================================
+// Code Window Component
+// ========================================
+
+.code-window {
+  background: $bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-xl;
+  border: 1px solid $border;
+}
+
+.code-header {
+  background: #1a1f2e;
+  padding: $spacing-md $spacing-lg;
+  @include flex-between;
+  gap: $spacing-md;
+}
+
+.code-dots {
+  display: flex;
+  gap: 6px;
+
+  span {
+    @include circle(12px);
+
+    &:nth-child(1) {
+      background: #ff5f56;
+    }
+
+    &:nth-child(2) {
+      background: #ffbd2e;
+    }
+
+    &:nth-child(3) {
+      background: #27c93f;
+    }
+  }
+}
+
+.code-title {
+  color: $text-secondary;
+  font-size: $font-size-small;
+}
+
+.code-content {
+  padding: $spacing-2xl;
+  overflow-x: auto;
+
+  pre {
+    margin: 0;
+    font-family: $font-family-mono;
+    font-size: 0.95em;
+    line-height: $line-height-relaxed;
+  }
+}
+
+// Syntax Highlighting
+.keyword {
+  color: #ff79c6;
+}
+
+.class {
+  color: #8be9fd;
+}
+
+.function {
+  color: #50fa7b;
+}
+
+.comment {
+  color: #6272a4;
+}

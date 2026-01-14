@@ -1,0 +1,74 @@
+// ========================================
+// Hero Section
+// ========================================
+
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: $spacing-5xl;
+  padding: $spacing-6xl $spacing-5xl;
+  background: $gradient-hero-bg;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    @include pseudo;
+    @include absolute(-50%, -50%, null, null);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, alpha($primary, 0.1) 0%, transparent 70%);
+    animation: pulse 8s ease-in-out infinite;
+  }
+
+  @include tablet {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+.hero-content {
+  z-index: $z-index-base;
+}
+
+.hero-title {
+  font-size: 4em;
+  font-weight: $font-weight-extrabold;
+  @include text-gradient($gradient-primary);
+  margin-bottom: $spacing-xl;
+  line-height: $line-height-tight;
+
+  @include tablet {
+    font-size: 3em;
+  }
+
+  @include mobile {
+    font-size: 2.5em;
+  }
+}
+
+.hero-subtitle {
+  font-size: 1.4em;
+  color: $text-secondary;
+  margin-bottom: $spacing-4xl;
+  max-width: 600px;
+}
+
+.hero-visual {
+  z-index: $z-index-base;
+}
+
+// Animations
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}

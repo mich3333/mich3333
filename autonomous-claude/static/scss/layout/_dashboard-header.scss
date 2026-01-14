@@ -1,0 +1,58 @@
+// ========================================
+// Dashboard Header
+// ========================================
+
+header {
+  text-align: center;
+  padding: $spacing-3xl 0;
+  border-bottom: 2px solid $border;
+  margin-bottom: $spacing-3xl;
+  position: relative;
+}
+
+h1 {
+  font-size: 3em;
+  margin-bottom: 10px;
+  @include text-gradient(linear-gradient(135deg, $primary 0%, $secondary 100%));
+
+  @include mobile {
+    font-size: 2em;
+  }
+}
+
+.status-badge {
+  @include absolute($spacing-3xl, null, null, $spacing-3xl);
+  @include flex-center;
+  gap: $spacing-sm;
+  background: $bg-card;
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $radius-2xl;
+  border: 1px solid $border;
+
+  @include mobile {
+    position: static;
+    margin-top: $spacing-lg;
+    justify-content: center;
+  }
+}
+
+.status-dot {
+  @include circle(10px);
+  background: $text-secondary;
+  @include animation(pulse-status, 2s);
+
+  &.active {
+    background: $success;
+  }
+}
+
+@keyframes pulse-status {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}

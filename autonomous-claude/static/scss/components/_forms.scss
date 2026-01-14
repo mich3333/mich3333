@@ -1,0 +1,23 @@
+// ========================================
+// Forms & Inputs
+// ========================================
+
+textarea {
+  width: 100%;
+  padding: $spacing-md;
+  background: alpha($bg-dark, 0.8);
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  color: $text;
+  font-size: $font-size-base;
+  resize: vertical;
+  font-family: inherit;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px alpha($primary, 0.1);
+  }
+}

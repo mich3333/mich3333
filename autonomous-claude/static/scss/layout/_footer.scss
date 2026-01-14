@@ -1,0 +1,47 @@
+// ========================================
+// Footer
+// ========================================
+
+.footer {
+  background: $bg-card;
+  padding: $spacing-5xl 0 $spacing-3xl;
+  border-top: 1px solid $border;
+}
+
+.footer-content {
+  @include grid-auto-fit(200px);
+  gap: $spacing-4xl;
+  margin-bottom: $spacing-4xl;
+}
+
+.footer-section {
+  h3,
+  h4 {
+    margin-bottom: $spacing-xl;
+  }
+
+  ul {
+    @include reset-list;
+  }
+
+  li {
+    margin-bottom: 10px;
+  }
+
+  a {
+    color: $text-secondary;
+    text-decoration: none;
+    transition: color $transition-base;
+
+    &:hover {
+      color: $primary;
+    }
+  }
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: $spacing-3xl;
+  border-top: 1px solid $border;
+  color: $text-secondary;
+}

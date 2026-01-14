@@ -1,0 +1,10 @@
+{
+  "outputStyle": "compressed",
+  "sourceMap": false,
+  "includePaths": [
+    "autonomous-claude/static/scss",
+    "multi-agent-system/static/scss"
+  ],
+  "precision": 5,
+  "quiet": false
+}

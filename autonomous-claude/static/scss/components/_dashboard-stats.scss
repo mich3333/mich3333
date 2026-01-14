@@ -1,0 +1,57 @@
+// ========================================
+// Dashboard Stats
+// ========================================
+
+.stat-grid {
+  @include grid-columns(2);
+  gap: $spacing-lg;
+}
+
+.stat-item {
+  text-align: center;
+  padding: $spacing-lg;
+  background: alpha($primary, 0.1);
+  border-radius: $radius-sm;
+  border: 1px solid alpha($primary, 0.2);
+}
+
+.stat-label {
+  font-size: $font-size-small;
+  color: $text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.stat-value {
+  font-size: 2em;
+  font-weight: bold;
+  color: $primary;
+}
+
+// Memory Stats
+.memory-stats {
+  @include flex-column;
+  gap: $spacing-md;
+}
+
+.stat-bar {
+  @include flex-column;
+  gap: 6px;
+}
+
+.stat-bar-header {
+  @include flex-between;
+  font-size: $font-size-small;
+}
+
+.stat-bar-progress {
+  height: 8px;
+  background: alpha($bg-dark, 0.8);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  background: $primary;
+  transition: width $transition-base;
+}

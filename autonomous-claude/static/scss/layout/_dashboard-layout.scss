@@ -1,0 +1,41 @@
+// ========================================
+// Dashboard Main Layout
+// ========================================
+
+.main-content {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: $spacing-xl;
+
+  @include tablet {
+    grid-template-columns: 1fr;
+  }
+}
+
+.column {
+  @include flex-column;
+  gap: $spacing-xl;
+}
+
+.controls-column {
+  @include tablet {
+    order: 2;
+  }
+}
+
+.data-column {
+  @include tablet {
+    order: 1;
+  }
+}
+
+// Responsive Grid Fixes
+@include mobile {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    grid-template-columns: 1fr;
+  }
+}

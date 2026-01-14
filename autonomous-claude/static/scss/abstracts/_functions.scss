@@ -1,0 +1,54 @@
+// ========================================
+// Functions - Utility Functions
+// ========================================
+
+// Convert px to rem
+@function rem($pixels, $base: 16) {
+  @return #{$pixels / $base}rem;
+}
+
+// Convert px to em
+@function em($pixels, $base: 16) {
+  @return #{$pixels / $base}em;
+}
+
+// Lighten color
+@function lighten-color($color, $amount: 10%) {
+  @return mix(white, $color, $amount);
+}
+
+// Darken color
+@function darken-color($color, $amount: 10%) {
+  @return mix(black, $color, $amount);
+}
+
+// Add alpha to color
+@function alpha($color, $opacity: 0.5) {
+  @return rgba($color, $opacity);
+}
+
+// Get spacing value
+@function spacing($multiplier: 1) {
+  @return $spacing-md * $multiplier;
+}
+
+// Z-index management
+@function z($layer) {
+  $z-layers: (
+    'base': 1,
+    'dropdown': 100,
+    'modal': 1000,
+    'tooltip': 2000
+  );
+
+  @return map-get($z-layers, $layer);
+}
+
+// Strip unit from value
+@function strip-unit($number) {
+  @if type-of($number) == 'number' and not unitless($number) {
+    @return $number / ($number * 0 + 1);
+  }
+
+  @return $number;
+}
