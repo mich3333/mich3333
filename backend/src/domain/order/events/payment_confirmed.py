@@ -1,5 +1,5 @@
 """PaymentConfirmed domain event"""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 from uuid import UUID
 
@@ -12,7 +12,7 @@ class PaymentConfirmed(DomainEvent):
 
     event_type: ClassVar[str] = "order.payment_confirmed"
 
-    order_id: UUID
-    payment_id: UUID
-    amount: str
-    currency: str
+    order_id: UUID = field(kw_only=True)
+    payment_id: UUID = field(kw_only=True)
+    amount: str = field(kw_only=True)
+    currency: str = field(kw_only=True)

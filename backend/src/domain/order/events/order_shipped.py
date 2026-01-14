@@ -1,5 +1,5 @@
 """OrderShipped domain event"""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 from uuid import UUID
 
@@ -12,6 +12,6 @@ class OrderShipped(DomainEvent):
 
     event_type: ClassVar[str] = "order.shipped"
 
-    order_id: UUID
-    tracking_number: str
-    shipping_address: str
+    order_id: UUID = field(kw_only=True)
+    tracking_number: str = field(kw_only=True)
+    shipping_address: str = field(kw_only=True)

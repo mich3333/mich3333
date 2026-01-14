@@ -1,5 +1,5 @@
 """OrderProcessingStarted domain event"""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 from uuid import UUID
 
@@ -12,4 +12,4 @@ class OrderProcessingStarted(DomainEvent):
 
     event_type: ClassVar[str] = "order.processing_started"
 
-    order_id: UUID
+    order_id: UUID = field(kw_only=True)

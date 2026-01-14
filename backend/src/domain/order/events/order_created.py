@@ -1,5 +1,5 @@
 """OrderCreated domain event"""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import ClassVar
 from uuid import UUID
@@ -13,5 +13,5 @@ class OrderCreated(DomainEvent):
 
     event_type: ClassVar[str] = "order.created"
 
-    order_id: UUID
-    customer_id: UUID
+    order_id: UUID = field(kw_only=True)
+    customer_id: UUID = field(kw_only=True)

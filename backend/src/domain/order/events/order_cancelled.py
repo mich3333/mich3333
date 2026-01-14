@@ -1,5 +1,5 @@
 """OrderCancelled domain event"""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 from uuid import UUID
 
@@ -12,5 +12,5 @@ class OrderCancelled(DomainEvent):
 
     event_type: ClassVar[str] = "order.cancelled"
 
-    order_id: UUID
-    reason: str
+    order_id: UUID = field(kw_only=True)
+    reason: str = field(kw_only=True)
