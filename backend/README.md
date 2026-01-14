@@ -277,56 +277,195 @@ Events are:
 
 ## Running the Project
 
-### Setup
+### Prerequisites
+
+- Python 3.11+
+- Docker & Docker Compose (for PostgreSQL)
+- Or: PostgreSQL 15+ installed locally
+
+### Quick Start
 
 ```bash
-# Install dependencies (using uv for speed)
-uv pip install -e ".[dev]"
+# 1. Start PostgreSQL and Redis using Docker Compose
+cd backend
+docker-compose up -d
 
-# Run tests
-pytest tests/ -v --cov=src
+# 2. Install Python dependencies
+pip install -e ".[dev]"
 
-# Type check
-mypy src/
+# 3. Run the API server
+cd src/interfaces/http
+python app.py
 
-# Lint
-ruff check src/
+# Or use uvicorn directly:
+uvicorn src.interfaces.http.app:app --reload
+
+# 4. Open your browser
+# - API Docs (Swagger): http://localhost:8000/docs
+# - ReDoc: http://localhost:8000/redoc
+# - Health Check: http://localhost:8000/health
+```
+
+### API Endpoints
+
+**Order Management:**
+```
+POST   /api/orders                      # Create new order
+GET    /api/orders/{order_id}           # Get order details
+GET    /api/orders/customers/{customer_id} # List customer orders
+POST   /api/orders/{order_id}/items     # Add line item
+DELETE /api/orders/{order_id}/items/{item_id} # Remove line item
+POST   /api/orders/{order_id}/submit    # Submit for payment
+POST   /api/orders/{order_id}/payment   # Confirm payment
+POST   /api/orders/{order_id}/ship      # Ship order
+POST   /api/orders/{order_id}/cancel    # Cancel order
+```
+
+### Example API Usage
+
+```bash
+# Create a new order
+curl -X POST http://localhost:8000/api/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customer_id": "123e4567-e89b-12d3-a456-426614174000",
+    "shipping_address": {
+      "street": "123 Main St",
+      "city": "San Francisco",
+      "state": "CA",
+      "postal_code": "94102",
+      "country": "US"
+    }
+  }'
+
+# Add a product to the order
+curl -X POST http://localhost:8000/api/orders/{order_id}/items \
+  -H "Content-Type: application/json" \
+  -d '{
+    "product_id": "223e4567-e89b-12d3-a456-426614174000",
+    "quantity": 2,
+    "unit_price": 29.99,
+    "currency": "USD"
+  }'
+
+# Submit the order
+curl -X POST http://localhost:8000/api/orders/{order_id}/submit
 ```
 
 ### Running Tests
 
 ```bash
-# Unit tests only (fast)
+# Unit tests only (fast, no database)
 pytest tests/unit/ -v
 
-# Integration tests (requires DB)
+# Integration tests (requires PostgreSQL running)
 pytest tests/integration/ -v
 
 # Full suite with coverage
-pytest --cov=src --cov-report=html
+pytest --cov=src --cov-report=html --cov-report=term-missing
+
+# Type checking
+mypy src/
+
+# Linting
+ruff check src/
+black --check src/
+isort --check-only src/
 ```
 
-## Future Enhancements
+### Development Workflow
 
-### Phase 2: Application Layer
-- Implement PlaceOrderService
-- Add PostgreSQL repository
-- Transactional outbox for events
+```bash
+# 1. Make changes to code
 
-### Phase 3: HTTP API
-- FastAPI REST endpoints
-- OpenAPI documentation
-- Authentication & authorization
+# 2. Run tests
+pytest tests/unit/ -v
 
-### Phase 4: Event-Driven Integration
-- Redis Streams event bus
-- Fulfillment subscriber (stub)
-- Idempotency for external calls
+# 3. Type check
+mypy src/
 
-### Phase 5: Observability
-- Structured logging (structlog)
-- Metrics (Prometheus)
-- Distributed tracing (OpenTelemetry)
+# 4. Format code
+black src/
+isort src/
+
+# 5. Lint
+ruff check src/ --fix
+
+# 6. Commit
+git add .
+git commit -m "feat: add feature X"
+```
+
+### Docker Setup
+
+```bash
+# Start services (PostgreSQL + Redis)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Reset database (WARNING: deletes all data!)
+docker-compose down -v
+docker-compose up -d
+```
+
+## Implementation Status
+
+### ✅ Completed
+- **Domain Layer**: Order aggregate, value objects, domain events
+- **Application Layer**: Commands, queries, DTOs, handlers
+- **Infrastructure Layer**: PostgreSQL repository, SQLAlchemy models, event publisher
+- **HTTP API**: FastAPI REST endpoints with full CRUD operations
+- **Docker Setup**: Docker Compose for PostgreSQL and Redis
+- **Documentation**: OpenAPI/Swagger UI at `/docs`
+
+### 🚧 Future Enhancements
+
+#### Phase 5: Authentication & Authorization
+- JWT-based authentication
+- Role-based access control (RBAC)
+- API key management
+- Rate limiting per user
+
+#### Phase 6: Advanced Event-Driven Features
+- Redis Streams event bus (replace in-memory)
+- Event sourcing for complete audit trail
+- Transactional outbox pattern
+- Fulfillment service subscriber (stub)
+- Idempotency for external API calls
+
+#### Phase 7: Observability & Monitoring
+- Structured logging with structlog
+- Prometheus metrics endpoint
+- Grafana dashboards
+- Distributed tracing with OpenTelemetry
+- Health checks with detailed status
+
+#### Phase 8: Performance & Scalability
+- Database query optimization
+- Connection pooling tuning
+- Caching layer (Redis)
+- Read replicas for queries
+- Horizontal scaling strategy
+
+#### Phase 9: Testing & Quality
+- Integration tests for API endpoints
+- E2E tests with test fixtures
+- Property-based testing (hypothesis)
+- Performance/load testing (Locust)
+- Contract testing for external APIs
+
+#### Phase 10: Deployment & Operations
+- Kubernetes manifests
+- Helm charts
+- CI/CD pipeline (GitHub Actions)
+- Database migrations with Alembic
+- Blue-green deployment
+- Rollback strategy
 
 ## Learning Resources
 

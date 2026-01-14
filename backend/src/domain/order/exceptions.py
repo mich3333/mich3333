@@ -48,3 +48,19 @@ class ProductNotInOrderError(OrderDomainException):
 class DuplicateLineItemError(OrderDomainException):
     """Attempted to add duplicate line item"""
     pass
+
+
+# Repository exceptions
+class OrderNotFoundError(OrderDomainException):
+    """Order not found in repository"""
+    pass
+
+
+class ConcurrencyError(OrderDomainException):
+    """Optimistic locking version conflict"""
+    pass
+
+
+class RepositoryError(OrderDomainException):
+    """Generic repository operation error"""
+    pass
