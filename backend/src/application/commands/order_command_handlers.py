@@ -91,10 +91,15 @@ class AddLineItemCommandHandler:
             raise OrderNotFoundError(f"Order {command.order_id} not found")
 
         # Execute domain operation
+        from ...domain.order.value_objects.address import Quantity
+
         unit_price = Money(command.unit_price, command.currency)
+        quantity = Quantity(command.quantity)
+
         order.add_item(
             product_id=command.product_id,
-            quantity=command.quantity,
+            product_name="Product",  # TODO: fetch from product catalog
+            quantity=quantity,
             unit_price=unit_price,
         )
 
@@ -226,10 +231,8 @@ class ShipOrderCommandHandler:
         if not order:
             raise OrderNotFoundError(f"Order {command.order_id} not found")
 
-        order.ship(
-            tracking_number=command.tracking_number,
-            carrier=command.carrier,
-        )
+        order.ship(tracking_number=command.tracking_number)
+        # Note: carrier information stored in command but not used by domain
 
         await self.order_repository.save(order)
 

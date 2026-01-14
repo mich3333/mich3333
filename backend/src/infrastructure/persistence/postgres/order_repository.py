@@ -42,10 +42,10 @@ class PostgresOrderRepository(OrderRepository):
 
         Handles optimistic locking using version field.
         """
-        # Check if order exists
+        # Check if order exists (no eager loading for update check)
         stmt = select(OrderModel).where(OrderModel.id == order.order_id.value)
         result = await self.session.execute(stmt)
-        existing_model = result.scalar_one_or_none()
+        existing_model = result.unique().scalar_one_or_none()
 
         if existing_model:
             # UPDATE - check version for optimistic locking
@@ -74,7 +74,7 @@ class PostgresOrderRepository(OrderRepository):
             .where(OrderModel.id == order_id.value)
         )
         result = await self.session.execute(stmt)
-        model = result.scalar_one_or_none()
+        model = result.unique().scalar_one_or_none()
 
         if not model:
             return None
@@ -97,7 +97,7 @@ class PostgresOrderRepository(OrderRepository):
             .offset(offset)
         )
         result = await self.session.execute(stmt)
-        models = result.scalars().all()
+        models = result.unique().scalars().all()
 
         return [self._model_to_aggregate(model) for model in models]
 
