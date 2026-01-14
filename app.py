@@ -4,12 +4,17 @@ Multi-Agent System - Flask Web Application with Async WebSockets
 """
 import asyncio
 import os
+from threading import Thread
 
+from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 
 from orchestrator import MultiAgentOrchestrator
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -27,17 +32,20 @@ def get_orchestrator():
         if not api_key:
             raise ValueError("ANTHROPIC_API_KEY environment variable not set")
 
-        # Create websocket callback
+        # Create websocket callback (thread-safe with SocketIO)
         def websocket_broadcast(agent: str, status: str, message: str):
-            """Broadcast agent updates to all connected clients."""
+            """
+            Broadcast agent updates to all connected clients.
+            Thread-safe: SocketIO handles cross-thread communication automatically.
+            """
             try:
                 socketio.emit('agent_update', {
                     'agent': agent,
                     'status': status,
                     'message': message
-                })
+                }, namespace='/')
             except Exception as e:
-                print(f"Broadcast error: {e}")
+                print(f"⚠️  Broadcast error: {e}")
 
         orchestrator = MultiAgentOrchestrator(
             api_key=api_key,
@@ -132,7 +140,7 @@ def handle_disconnect():
 @socketio.on('start_task')
 def handle_start_task(data):
     """
-    Start a new task execution (async).
+    Start a new task execution (async in background thread).
 
     Expected data:
     {
@@ -154,27 +162,41 @@ def handle_start_task(data):
             'message': 'Task execution started'
         })
 
-        # Run async task in event loop
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        # Run async task in background thread
+        def run_async_task():
+            """Run the async task in a separate thread with its own event loop."""
+            try:
+                # Create new event loop for this thread
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
 
-        try:
-            # Execute the task (async)
-            result = loop.run_until_complete(orch.execute_task(user_task))
+                try:
+                    # Execute the task (async)
+                    result = loop.run_until_complete(orch.execute_task(user_task))
 
-            # Emit completion
-            emit('execution_complete', {
-                'result': result,
-                'task_id': result.get('task_id'),
-                'status': result.get('status'),
-                'final_report': result.get('final_report', '')
-            })
+                    # Emit completion (thread-safe with socketio)
+                    socketio.emit('execution_complete', {
+                        'result': result,
+                        'task_id': result.get('task_id'),
+                        'status': result.get('status'),
+                        'final_report': result.get('final_report', '')
+                    })
 
-        finally:
-            loop.close()
+                except Exception as e:
+                    socketio.emit('error', {'message': f'Task execution failed: {str(e)}'})
+
+                finally:
+                    loop.close()
+
+            except Exception as e:
+                socketio.emit('error', {'message': f'Thread execution failed: {str(e)}'})
+
+        # Start background thread
+        thread = Thread(target=run_async_task, daemon=True)
+        thread.start()
 
     except Exception as e:
-        emit('error', {'message': f'Task execution failed: {str(e)}'})
+        emit('error', {'message': f'Task start failed: {str(e)}'})
 
 
 @socketio.on('cancel_task')
