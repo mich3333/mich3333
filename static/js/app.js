@@ -150,7 +150,7 @@ class MultiAgentUI {
         this.setExecuting(true);
 
         // Execute via WebSocket for real-time updates
-        this.socket.emit('execute_realtime', { task: task });
+        this.socket.emit('start_task', { task: task });
     }
 
     setExecuting(executing) {
