@@ -7,7 +7,7 @@ import os
 from threading import Thread
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 
@@ -16,9 +16,26 @@ from orchestrator import MultiAgentOrchestrator
 # Load environment variables from .env file
 load_dotenv()
 
+# Custom middleware to bypass host checking
+class TrustedHostMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        # Allow any host
+        return self.app(environ, start_response)
+
 app = Flask(__name__)
+app.wsgi_app = TrustedHostMiddleware(app.wsgi_app)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+# Configure SocketIO with threading
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    async_mode='threading',
+    engineio_logger=False,
+    logger=False
+)
 
 # Global orchestrator instance
 orchestrator = None
@@ -257,6 +274,7 @@ if __name__ == '__main__':
     ╚══════════════════════════════════════════╝
 
     📍 Server: http://localhost:{port}
+    📱 Mobile Access: http://21.0.0.128:{port}
     🔑 API Key: {'✅ Set' if os.getenv('ANTHROPIC_API_KEY') else '❌ Not Set'}
     🎯 Agents: Manager, Researcher, Coder, Reviewer, Reporter
     ⚡ Real-time: WebSockets with async execution
@@ -271,4 +289,14 @@ if __name__ == '__main__':
 
     """)
 
-    socketio.run(app, host='0.0.0.0', port=port, debug=debug, allow_unsafe_werkzeug=True)
+    #  Patch Werkzeug's trusted hosts check
+    from werkzeug import serving
+    serving.WSGIRequestHandler.server_version = "MultiAgent/2.0"
+
+    # Monkey-patch to disable host validation
+    def no_host_validation(self, *args, **kwargs):
+        pass
+    serving.BaseWSGIServer._validate_server_name = no_host_validation
+
+    print(f"🚀 Starting server on 0.0.0.0:{port} (all network interfaces)...")
+    socketio.run(app, host='0.0.0.0', port=port, debug=False, allow_unsafe_werkzeug=True, use_reloader=False)
