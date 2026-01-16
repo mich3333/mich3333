@@ -46,3 +46,9 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Runtime data and databases
+data/
+*.db
+*.sqlite
+*.sqlite3
