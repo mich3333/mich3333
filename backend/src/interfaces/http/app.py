@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .routes.orders import router as orders_router
-from ...infrastructure.persistence.postgres import Database
+from ...infrastructure.persistence.postgres import Database, set_db_instance
 
 
 # Configure logging
@@ -41,6 +41,9 @@ async def lifespan(app: FastAPI):
     global db
     database_url = "postgresql+asyncpg://postgres:postgres@localhost:5432/orders"
     db = Database(database_url, echo=True)  # Set echo=False in production
+
+    # Set global database instance for dependency injection
+    set_db_instance(db)
 
     # Create tables (in production, use Alembic migrations instead)
     logger.info("📊 Creating database tables...")
@@ -102,19 +105,6 @@ async def root():
     }
 
 
-# Dependency injection for database session
-from ...infrastructure.persistence.postgres import get_db_session
-
-
-async def get_session_factory():
-    """Get database session factory for dependency injection"""
-    if db is None:
-        raise RuntimeError("Database not initialized")
-    return db.get_session_factory()
-
-
-# Override dependency in app
-app.dependency_overrides[get_session_factory] = get_session_factory
 
 
 if __name__ == "__main__":

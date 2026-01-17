@@ -95,10 +95,18 @@ class Database:
         return self.session_factory
 
 
+# Global database instance (will be set by the app)
+_db_instance: Database | None = None
+
+
+def set_db_instance(db: Database) -> None:
+    """Set the global database instance."""
+    global _db_instance
+    _db_instance = db
+
+
 # Dependency for FastAPI
-async def get_db_session(
-    session_factory: async_sessionmaker[AsyncSession],
-) -> AsyncGenerator[AsyncSession, None]:
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     FastAPI dependency to get a database session.
 
@@ -109,6 +117,10 @@ async def get_db_session(
         ):
             ...
     """
+    if _db_instance is None:
+        raise RuntimeError("Database not initialized. Call set_db_instance() first.")
+
+    session_factory = _db_instance.get_session_factory()
     async with session_factory() as session:
         try:
             yield session
