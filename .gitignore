@@ -43,3 +43,4 @@ build/
 
 # Separate git repositories
 multi-agent-system/
+autonomous-claude/logs/

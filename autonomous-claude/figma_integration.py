@@ -239,14 +239,18 @@ class FigmaToHTML:
             font_size = style.get('fontSize', 16)
             font_weight = style.get('fontWeight', 400)
 
-            html += f'{indent_str}<p class="text-[{font_size}px] font-[{font_weight}]">{text}</p>\n'
+            # Use inline styles instead of dynamic Tailwind classes (which don't work)
+            html += f'{indent_str}<p style="font-size: {font_size}px; font-weight: {font_weight};">{text}</p>\n'
 
         elif node_type == 'RECTANGLE':
             bg_color = self._get_fill_color(node)
             width = node.get('absoluteBoundingBox', {}).get('width', 'auto')
             height = node.get('absoluteBoundingBox', {}).get('height', 'auto')
 
-            html += f'{indent_str}<div class="w-[{width}px] h-[{height}px]" style="background: {bg_color}"></div>\n'
+            # Use inline styles instead of dynamic Tailwind classes
+            width_style = f"{width}px" if isinstance(width, (int, float)) else width
+            height_style = f"{height}px" if isinstance(height, (int, float)) else height
+            html += f'{indent_str}<div style="width: {width_style}; height: {height_style}; background: {bg_color};"></div>\n'
 
         return html
 

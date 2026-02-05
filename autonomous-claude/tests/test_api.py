@@ -52,12 +52,18 @@ class TestAPI:
         assert isinstance(data['iteration'], int)
 
     def test_recent_memories_endpoint(self, client):
-        """Test recent memories endpoint."""
+        """Test recent memories endpoint with pagination."""
         response = client.get('/api/memories/recent')
         assert response.status_code == 200
 
         data = json.loads(response.data)
-        assert isinstance(data, list)
+        assert 'data' in data
+        assert 'pagination' in data
+        assert isinstance(data['data'], list)
+        assert 'limit' in data['pagination']
+        assert 'offset' in data['pagination']
+        assert 'count' in data['pagination']
+        assert 'has_more' in data['pagination']
 
     def test_memory_stats_endpoint(self, client):
         """Test memory stats endpoint."""

@@ -13,6 +13,11 @@ import json
 from datetime import datetime
 import threading
 import time
+from functools import wraps
+from logging_config import setup_logging
+
+# Initialize logger
+logger = setup_logging('web_app')
 
 # Add autonomous-claude to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -39,7 +44,7 @@ cache = {
 }
 CACHE_TTL = 5  # Cache for 5 seconds
 
-# Global agent state
+# Global agent state with thread safety
 agent_state = {
     'running': False,
     'current_goal': None,
@@ -48,18 +53,57 @@ agent_state = {
     'agent': None,
     'brain': None
 }
+agent_state_lock = threading.Lock()  # Thread-safe access to agent_state
+
+# Authentication decorator for sensitive endpoints
+def require_api_key(f):
+    """Decorator to require API key authentication for sensitive operations."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        api_key = request.headers.get('X-API-Key') or request.args.get('api_key')
+        expected_key = os.getenv('API_SECRET_KEY')
+
+        # If no API key is configured, allow access (development mode)
+        if not expected_key:
+            return f(*args, **kwargs)
+
+        # Check if provided key matches
+        if api_key != expected_key:
+            return jsonify({'error': 'Unauthorized. Valid API key required.'}), 401
+
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Input validation helpers
+def validate_string(value, field_name, min_length=1, max_length=10000):
+    """Validate string input."""
+    if not isinstance(value, str):
+        return f"{field_name} must be a string"
+    if len(value) < min_length:
+        return f"{field_name} must be at least {min_length} characters"
+    if len(value) > max_length:
+        return f"{field_name} must be at most {max_length} characters"
+    return None
+
+def validate_memory_type(memory_type):
+    """Validate memory type."""
+    valid_types = ['action', 'observation', 'thought', 'goal']
+    if memory_type not in valid_types:
+        return f"Invalid memory type. Must be one of: {', '.join(valid_types)}"
+    return None
 
 def initialize_brain():
     """Initialize Claude Brain if API key is available."""
     api_key = os.getenv('ANTHROPIC_API_KEY')
-    if api_key and not agent_state['brain']:
-        try:
-            agent_state['brain'] = ClaudeBrain(api_key=api_key, model="claude-opus-4-5-20251101")
-            return True
-        except Exception as e:
-            print(f"Failed to initialize Claude Brain: {e}")
-            return False
-    return agent_state['brain'] is not None
+    with agent_state_lock:
+        if api_key and not agent_state['brain']:
+            try:
+                agent_state['brain'] = ClaudeBrain(api_key=api_key, model="claude-opus-4-5-20251101")
+                return True
+            except Exception as e:
+                logger.error(f"Failed to initialize Claude Brain: {e}")
+                return False
+        return agent_state['brain'] is not None
 
 
 # ==================== ROUTES ====================
@@ -85,27 +129,39 @@ def showcase():
 @app.route('/api/status')
 def get_status():
     """Get current agent status."""
-    return jsonify({
-        'running': agent_state['running'],
-        'current_goal': agent_state['current_goal'],
-        'iteration': agent_state['iteration'],
-        'last_decision': agent_state['last_decision'],
-        'brain_available': agent_state['brain'] is not None,
-        'anthropic_key_set': os.getenv('ANTHROPIC_API_KEY') is not None,
-        'qdrant_available': long_term.qdrant_available
-    })
+    with agent_state_lock:
+        return jsonify({
+            'running': agent_state['running'],
+            'current_goal': agent_state['current_goal'],
+            'iteration': agent_state['iteration'],
+            'last_decision': agent_state['last_decision'],
+            'brain_available': agent_state['brain'] is not None,
+            'anthropic_key_set': os.getenv('ANTHROPIC_API_KEY') is not None,
+            'qdrant_available': long_term.qdrant_available
+        })
 
 
 @app.route('/api/memories/recent')
 def get_recent_memories():
-    """Get recent memories from short-term storage with caching."""
+    """Get recent memories from short-term storage with pagination support."""
     limit = request.args.get('limit', 50, type=int)
-    limit = min(limit, 100)  # Cap at 100 for performance
-    memories = short_term.get_recent(limit)
+    offset = request.args.get('offset', 0, type=int)
+
+    # Validate pagination parameters
+    if limit < 1 or limit > 100:
+        return jsonify({'error': 'Limit must be between 1 and 100'}), 400
+    if offset < 0:
+        return jsonify({'error': 'Offset must be non-negative'}), 400
+
+    # Fetch memories (get more than needed to apply offset)
+    memories = short_term.get_recent(limit + offset)
+
+    # Apply pagination
+    paginated_memories = memories[offset:offset + limit]
 
     # Format for JSON
     formatted = []
-    for m in memories:
+    for m in paginated_memories:
         formatted.append({
             'id': m['id'],
             'type': m['type'],
@@ -113,7 +169,15 @@ def get_recent_memories():
             'timestamp': m['timestamp'].isoformat() if hasattr(m['timestamp'], 'isoformat') else str(m['timestamp'])
         })
 
-    return jsonify(formatted)
+    return jsonify({
+        'data': formatted,
+        'pagination': {
+            'limit': limit,
+            'offset': offset,
+            'count': len(formatted),
+            'has_more': len(formatted) == limit
+        }
+    })
 
 
 @app.route('/api/memories/search')
@@ -123,10 +187,29 @@ def search_memories():
     if not memory_type:
         return jsonify({'error': 'Type parameter required'}), 400
 
-    memories = short_term.get_by_type(memory_type, limit=50)
+    # Validate memory type
+    type_error = validate_memory_type(memory_type)
+    if type_error:
+        return jsonify({'error': type_error}), 400
+
+    # Get pagination parameters
+    limit = request.args.get('limit', 50, type=int)
+    offset = request.args.get('offset', 0, type=int)
+
+    # Validate pagination parameters
+    if limit < 1 or limit > 100:
+        return jsonify({'error': 'Limit must be between 1 and 100'}), 400
+    if offset < 0:
+        return jsonify({'error': 'Offset must be non-negative'}), 400
+
+    # Fetch memories
+    memories = short_term.get_by_type(memory_type, limit=limit + offset)
+
+    # Apply pagination
+    paginated_memories = memories[offset:offset + limit]
 
     formatted = []
-    for m in memories:
+    for m in paginated_memories:
         formatted.append({
             'id': m['id'],
             'type': m['type'],
@@ -134,7 +217,15 @@ def search_memories():
             'timestamp': m['timestamp'].isoformat() if hasattr(m['timestamp'], 'isoformat') else str(m['timestamp'])
         })
 
-    return jsonify(formatted)
+    return jsonify({
+        'data': formatted,
+        'pagination': {
+            'limit': limit,
+            'offset': offset,
+            'count': len(formatted),
+            'has_more': len(formatted) == limit
+        }
+    })
 
 
 @app.route('/api/memories/stats')
@@ -168,60 +259,99 @@ def get_memory_stats():
 def add_memory():
     """Add a new memory."""
     data = request.json
-    if not data or 'type' not in data or 'content' not in data:
-        return jsonify({'error': 'Type and content required'}), 400
+    if not data:
+        return jsonify({'error': 'Request body required'}), 400
+
+    # Validate required fields
+    if 'type' not in data:
+        return jsonify({'error': 'Field "type" is required'}), 400
+    if 'content' not in data:
+        return jsonify({'error': 'Field "content" is required'}), 400
+
+    # Validate memory type
+    type_error = validate_memory_type(data['type'])
+    if type_error:
+        return jsonify({'error': type_error}), 400
+
+    # Validate content
+    content_error = validate_string(data['content'], 'content', min_length=1, max_length=5000)
+    if content_error:
+        return jsonify({'error': content_error}), 400
 
     try:
         memory_id = short_term.add(data['type'], data['content'])
         return jsonify({'success': True, 'id': memory_id})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'Failed to add memory: {str(e)}'}), 500
 
 
 @app.route('/api/agent/goal', methods=['POST'])
 def set_goal():
     """Set agent goal."""
     data = request.json
-    if not data or 'goal' not in data:
-        return jsonify({'error': 'Goal required'}), 400
+    if not data:
+        return jsonify({'error': 'Request body required'}), 400
 
-    agent_state['current_goal'] = data['goal']
+    if 'goal' not in data:
+        return jsonify({'error': 'Field "goal" is required'}), 400
+
+    # Validate goal
+    goal_error = validate_string(data['goal'], 'goal', min_length=3, max_length=1000)
+    if goal_error:
+        return jsonify({'error': goal_error}), 400
+
+    with agent_state_lock:
+        agent_state['current_goal'] = data['goal']
     short_term.add('goal', data['goal'])
 
     return jsonify({'success': True, 'goal': data['goal']})
 
 
 @app.route('/api/agent/start', methods=['POST'])
+@require_api_key
 def start_agent():
     """Start the autonomous agent."""
-    if agent_state['running']:
-        return jsonify({'error': 'Agent already running'}), 400
+    with agent_state_lock:
+        if agent_state['running']:
+            return jsonify({'error': 'Agent already running'}), 400
 
-    if not agent_state['current_goal']:
-        return jsonify({'error': 'No goal set'}), 400
+        if not agent_state['current_goal']:
+            return jsonify({'error': 'No goal set'}), 400
 
     # Initialize brain if needed
     if not initialize_brain():
         return jsonify({'error': 'Claude Brain not available. Set ANTHROPIC_API_KEY.'}), 500
 
-    agent_state['running'] = True
-    agent_state['iteration'] = 0
+    with agent_state_lock:
+        agent_state['running'] = True
+        agent_state['iteration'] = 0
+        current_goal = agent_state['current_goal']
 
     # Start agent in background thread
     def run_agent():
         try:
             agent = AutonomousAgentWithClaude(model="claude-opus-4-5-20251101")
-            agent.set_goal(agent_state['current_goal'])
-            agent_state['agent'] = agent
+            agent.set_goal(current_goal)
 
-            while agent_state['running']:
+            with agent_state_lock:
+                agent_state['agent'] = agent
+
+            while True:
+                with agent_state_lock:
+                    if not agent_state['running']:
+                        break
+
                 agent.run_cycle()
-                agent_state['iteration'] = agent.iteration
+
+                with agent_state_lock:
+                    agent_state['iteration'] = agent.iteration
+
                 time.sleep(2)  # Delay between cycles
 
         except Exception as e:
-            print(f"Agent error: {e}")
-            agent_state['running'] = False
+            logger.error(f"Agent error: {e}", exc_info=True)
+            with agent_state_lock:
+                agent_state['running'] = False
 
     thread = threading.Thread(target=run_agent, daemon=True)
     thread.start()
@@ -230,10 +360,12 @@ def start_agent():
 
 
 @app.route('/api/agent/stop', methods=['POST'])
+@require_api_key
 def stop_agent():
     """Stop the autonomous agent."""
-    agent_state['running'] = False
-    agent_state['agent'] = None
+    with agent_state_lock:
+        agent_state['running'] = False
+        agent_state['agent'] = None
 
     return jsonify({'success': True})
 
@@ -242,22 +374,34 @@ def stop_agent():
 def claude_think():
     """Ask Claude to think about a situation."""
     data = request.json
-    if not data or 'situation' not in data:
-        return jsonify({'error': 'Situation required'}), 400
+    if not data:
+        return jsonify({'error': 'Request body required'}), 400
+
+    if 'situation' not in data:
+        return jsonify({'error': 'Field "situation" is required'}), 400
+
+    # Validate situation
+    situation_error = validate_string(data['situation'], 'situation', min_length=3, max_length=5000)
+    if situation_error:
+        return jsonify({'error': situation_error}), 400
 
     # Initialize brain if needed
     if not initialize_brain():
         return jsonify({'error': 'Claude Brain not available. Set ANTHROPIC_API_KEY.'}), 500
 
     try:
-        context = data.get('context', {})
-        decision = agent_state['brain'].think(data['situation'], context)
+        with agent_state_lock:
+            brain = agent_state['brain']
 
-        agent_state['last_decision'] = {
-            'situation': data['situation'],
-            'decision': decision,
-            'timestamp': datetime.now().isoformat()
-        }
+        context = data.get('context', {})
+        decision = brain.think(data['situation'], context)
+
+        with agent_state_lock:
+            agent_state['last_decision'] = {
+                'situation': data['situation'],
+                'decision': decision,
+                'timestamp': datetime.now().isoformat()
+            }
 
         return jsonify({
             'success': True,
@@ -272,24 +416,46 @@ def claude_think():
 def claude_analyze():
     """Ask Claude to analyze and decide."""
     data = request.json
-    if not data or 'goal' not in data or 'observations' not in data:
-        return jsonify({'error': 'Goal and observations required'}), 400
+    if not data:
+        return jsonify({'error': 'Request body required'}), 400
+
+    if 'goal' not in data:
+        return jsonify({'error': 'Field "goal" is required'}), 400
+    if 'observations' not in data:
+        return jsonify({'error': 'Field "observations" is required'}), 400
+
+    # Validate goal
+    goal_error = validate_string(data['goal'], 'goal', min_length=3, max_length=1000)
+    if goal_error:
+        return jsonify({'error': goal_error}), 400
+
+    # Validate observations (can be string or list)
+    if isinstance(data['observations'], str):
+        obs_error = validate_string(data['observations'], 'observations', min_length=1, max_length=10000)
+        if obs_error:
+            return jsonify({'error': obs_error}), 400
+    elif not isinstance(data['observations'], list):
+        return jsonify({'error': 'observations must be a string or list'}), 400
 
     # Initialize brain if needed
     if not initialize_brain():
         return jsonify({'error': 'Claude Brain not available. Set ANTHROPIC_API_KEY.'}), 500
 
     try:
-        analysis = agent_state['brain'].analyze_and_decide(
+        with agent_state_lock:
+            brain = agent_state['brain']
+
+        analysis = brain.analyze_and_decide(
             data['goal'],
             data['observations']
         )
 
-        agent_state['last_decision'] = {
-            'goal': data['goal'],
-            'analysis': analysis,
-            'timestamp': datetime.now().isoformat()
-        }
+        with agent_state_lock:
+            agent_state['last_decision'] = {
+                'goal': data['goal'],
+                'analysis': analysis,
+                'timestamp': datetime.now().isoformat()
+            }
 
         return jsonify({
             'success': True,
@@ -304,8 +470,23 @@ def claude_analyze():
 def claude_learn():
     """Ask Claude to learn from experience."""
     data = request.json
-    if not data or 'experience' not in data or 'outcome' not in data:
-        return jsonify({'error': 'Experience and outcome required'}), 400
+    if not data:
+        return jsonify({'error': 'Request body required'}), 400
+
+    if 'experience' not in data:
+        return jsonify({'error': 'Field "experience" is required'}), 400
+    if 'outcome' not in data:
+        return jsonify({'error': 'Field "outcome" is required'}), 400
+
+    # Validate experience
+    exp_error = validate_string(data['experience'], 'experience', min_length=3, max_length=5000)
+    if exp_error:
+        return jsonify({'error': exp_error}), 400
+
+    # Validate outcome
+    outcome_error = validate_string(data['outcome'], 'outcome', min_length=3, max_length=5000)
+    if outcome_error:
+        return jsonify({'error': outcome_error}), 400
 
     # Initialize brain if needed
     if not initialize_brain():
@@ -327,8 +508,9 @@ def claude_learn():
 
 
 @app.route('/api/database/clear', methods=['POST'])
+@require_api_key
 def clear_database():
-    """Clear all memories (use with caution!)."""
+    """Clear all memories (use with caution!). Requires API key authentication."""
     try:
         import sqlite3
         conn = sqlite3.connect(short_term.db_path)
@@ -384,22 +566,19 @@ def import_figma():
 
 
 if __name__ == '__main__':
-    print("=" * 70)
-    print("🤖 Autonomous Claude - Web Interface")
-    print("=" * 70)
-    print()
+    logger.info("=" * 70)
+    logger.info("🤖 Autonomous Claude - Web Interface")
+    logger.info("=" * 70)
 
     # Check API key
     if os.getenv('ANTHROPIC_API_KEY'):
-        print("✅ ANTHROPIC_API_KEY found")
+        logger.info("✅ ANTHROPIC_API_KEY found")
         initialize_brain()
     else:
-        print("⚠️  ANTHROPIC_API_KEY not set - Claude features will be unavailable")
-        print("   Set it with: export ANTHROPIC_API_KEY='your-key'")
+        logger.warning("⚠️  ANTHROPIC_API_KEY not set - Claude features will be unavailable")
+        logger.info("   Set it with: export ANTHROPIC_API_KEY='your-key'")
 
-    print()
-    print(f"🌐 Starting web server...")
-    print()
+    logger.info("🌐 Starting web server...")
 
     # Get port from environment (for Railway, Heroku, etc.)
     port = int(os.getenv('PORT', 5000))

@@ -8,6 +8,10 @@ import os
 import json
 from typing import List, Dict, Optional
 from memory import short_term, long_term
+from logging_config import setup_logging
+
+# Initialize logger
+logger = setup_logging('claude_brain')
 
 # Check if anthropic is installed
 try:
@@ -15,7 +19,7 @@ try:
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
-    print("⚠️  Anthropic not installed. Install with: pip install anthropic")
+    logger.warning("⚠️  Anthropic not installed. Install with: pip install anthropic")
 
 
 class ClaudeBrain:
@@ -47,7 +51,7 @@ class ClaudeBrain:
         self.model = model
         self.conversation_history = []
 
-        print(f"✅ Claude Brain initialized (model: {model})")
+        logger.info(f"✅ Claude Brain initialized (model: {model})")
 
     def think(self, situation: str, context: Dict = None) -> str:
         """
@@ -117,15 +121,37 @@ class ClaudeBrain:
 
         response = self.think(context_text)
 
-        # Try to parse JSON
+        # Try to parse JSON with robust error handling
         try:
             return json.loads(response)
-        except:
-            # Fallback if not JSON
+        except json.JSONDecodeError as e:
+            # Try to extract JSON from response if embedded in text
+            import re
+            json_match = re.search(r'\{[^{}]*"action"[^{}]*\}', response, re.DOTALL)
+            if json_match:
+                try:
+                    return json.loads(json_match.group())
+                except json.JSONDecodeError:
+                    pass
+
+            # Log warning about JSON parsing failure
+            logger.warning(f"Claude did not return valid JSON. Error: {e}")
+            logger.debug(f"Response: {response[:200]}...")
+
+            # Fallback with original response
             return {
-                "action": response,
-                "reasoning": "Claude response",
-                "priority": "medium"
+                "action": response[:500],  # Limit length
+                "reasoning": "Failed to parse JSON response",
+                "priority": "medium",
+                "parse_error": True
+            }
+        except Exception as e:
+            logger.error(f"Unexpected error parsing Claude response: {e}", exc_info=True)
+            return {
+                "action": "Error occurred",
+                "reasoning": f"Unexpected error: {str(e)}",
+                "priority": "low",
+                "parse_error": True
             }
 
     def ask_for_help(self, question: str, context: str = "") -> str:

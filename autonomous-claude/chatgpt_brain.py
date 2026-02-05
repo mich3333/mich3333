@@ -8,6 +8,10 @@ import os
 import json
 from typing import List, Dict, Optional
 from memory import short_term, long_term
+from logging_config import setup_logging
+
+# Initialize logger
+logger = setup_logging('chatgpt_brain')
 
 # Check if openai is installed
 try:
@@ -15,7 +19,7 @@ try:
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
-    print("⚠️  OpenAI not installed. Install with: pip install openai")
+    logger.warning("⚠️  OpenAI not installed. Install with: pip install openai")
 
 
 class ChatGPTBrain:
@@ -117,15 +121,37 @@ class ChatGPTBrain:
 
         response = self.think(context_text)
 
-        # Try to parse JSON
+        # Try to parse JSON with robust error handling
         try:
             return json.loads(response)
-        except:
-            # Fallback if not JSON
+        except json.JSONDecodeError as e:
+            # Try to extract JSON from response if embedded in text
+            import re
+            json_match = re.search(r'\{[^{}]*"action"[^{}]*\}', response, re.DOTALL)
+            if json_match:
+                try:
+                    return json.loads(json_match.group())
+                except json.JSONDecodeError:
+                    pass
+
+            # Log warning about JSON parsing failure
+            logger.warning(f"ChatGPT did not return valid JSON. Error: {e}")
+            logger.debug(f"Response: {response[:200]}...")
+
+            # Fallback with original response
             return {
-                "action": response,
-                "reasoning": "ChatGPT response",
-                "priority": "medium"
+                "action": response[:500],  # Limit length
+                "reasoning": "Failed to parse JSON response",
+                "priority": "medium",
+                "parse_error": True
+            }
+        except Exception as e:
+            logger.error(f"Unexpected error parsing ChatGPT response: {e}", exc_info=True)
+            return {
+                "action": "Error occurred",
+                "reasoning": f"Unexpected error: {str(e)}",
+                "priority": "low",
+                "parse_error": True
             }
 
     def ask_for_help(self, question: str, context: str = "") -> str:
