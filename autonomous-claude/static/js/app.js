@@ -1,5 +1,25 @@
 "use strict";
 // Autonomous Claude - Dashboard TypeScript
+// ==================== UTILITY FUNCTIONS ====================
+function debounce(func, wait) {
+    let timeout = null;
+    return (...args) => {
+        if (timeout !== null) {
+            clearTimeout(timeout);
+        }
+        timeout = window.setTimeout(() => func(...args), wait);
+    };
+}
+function throttle(func, limit) {
+    let inThrottle = false;
+    return (...args) => {
+        if (!inThrottle) {
+            func(...args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
 // ==================== STATE ====================
 class DashboardState {
     constructor() {
@@ -7,12 +27,17 @@ class DashboardState {
         this.refreshInterval = null;
         this.isAgentRunning = false;
         this.apiUrl = '';
+        this.lastActivity = Date.now();
+        this.consecutiveErrors = 0;
+        this.isOnline = navigator.onLine;
     }
     setFilter(filter) {
         this.currentFilter = filter;
+        this.updateActivity();
     }
     setAgentRunning(running) {
         this.isAgentRunning = running;
+        this.updateActivity();
     }
     setRefreshInterval(interval) {
         this.refreshInterval = interval;
@@ -23,49 +48,147 @@ class DashboardState {
             this.refreshInterval = null;
         }
     }
+    updateActivity() {
+        this.lastActivity = Date.now();
+    }
+    isActive() {
+        // Consider inactive after 5 minutes of no activity
+        return Date.now() - this.lastActivity < 300000;
+    }
+    incrementErrors() {
+        this.consecutiveErrors++;
+    }
+    resetErrors() {
+        this.consecutiveErrors = 0;
+    }
+    setOnlineStatus(online) {
+        this.isOnline = online;
+    }
 }
 const state = new DashboardState();
 // ==================== API CLIENT ====================
 class ApiClient {
     constructor(baseUrl = '') {
+        this.abortControllers = new Map();
+        this.requestCache = new Map();
+        this.CACHE_TTL = 5000; // 5 seconds cache
         this.baseUrl = baseUrl;
     }
-    async call(endpoint, method = 'GET', body = null) {
+    async call(endpoint, method = 'GET', body = null, options = {}) {
+        const { retry = true, timeout = 10000, cache = false } = options;
+        // Check cache for GET requests
+        if (method === 'GET' && cache) {
+            const cached = this.getCached(endpoint);
+            if (cached)
+                return cached;
+        }
+        // Cancel previous request to same endpoint
+        this.cancelRequest(endpoint);
+        // Create new abort controller
+        const controller = new AbortController();
+        this.abortControllers.set(endpoint, controller);
+        // Setup timeout
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
         try {
-            const options = {
+            const response = await this.fetchWithRetry(endpoint, {
                 method,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            };
-            if (body) {
-                options.body = JSON.stringify(body);
+                headers: { 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : null,
+                signal: controller.signal
+            }, retry ? 3 : 1);
+            clearTimeout(timeoutId);
+            this.abortControllers.delete(endpoint);
+            // Cache successful GET requests
+            if (method === 'GET' && cache) {
+                this.setCache(endpoint, response);
             }
-            const response = await fetch(this.baseUrl + endpoint, options);
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Request failed');
-            }
-            return data;
+            return response;
         }
         catch (error) {
-            console.error('API Error:', error);
-            const message = error instanceof Error ? error.message : 'Unknown error';
-            ToastManager.show(message, 'error');
+            clearTimeout(timeoutId);
+            this.abortControllers.delete(endpoint);
+            if (error instanceof Error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timeout');
+                }
+                console.error('API Error:', error);
+                ToastManager.show(this.getErrorMessage(error), 'error');
+            }
             throw error;
         }
     }
+    async fetchWithRetry(endpoint, options, maxRetries) {
+        let lastError = null;
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                const response = await fetch(this.baseUrl + endpoint, options);
+                const data = await response.json();
+                if (!response.ok) {
+                    // Don't retry client errors (4xx)
+                    if (response.status >= 400 && response.status < 500) {
+                        throw new Error(data.error || `Request failed with status ${response.status}`);
+                    }
+                    // Retry server errors (5xx)
+                    throw new Error(data.error || 'Server error');
+                }
+                return data;
+            }
+            catch (error) {
+                lastError = error instanceof Error ? error : new Error('Unknown error');
+                // Don't retry on abort
+                if (lastError.name === 'AbortError') {
+                    throw lastError;
+                }
+                // Exponential backoff before retry
+                if (attempt < maxRetries - 1) {
+                    const delay = Math.min(1000 * Math.pow(2, attempt), 5000);
+                    await this.sleep(delay);
+                }
+            }
+        }
+        throw lastError || new Error('Request failed');
+    }
+    cancelRequest(endpoint) {
+        const controller = this.abortControllers.get(endpoint);
+        if (controller) {
+            controller.abort();
+            this.abortControllers.delete(endpoint);
+        }
+    }
+    getCached(key) {
+        const cached = this.requestCache.get(key);
+        if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+            return cached.data;
+        }
+        this.requestCache.delete(key);
+        return null;
+    }
+    setCache(key, data) {
+        this.requestCache.set(key, { data, timestamp: Date.now() });
+    }
+    getErrorMessage(error) {
+        if (!navigator.onLine) {
+            return 'אין חיבור לאינטרנט';
+        }
+        if (error.message.includes('timeout')) {
+            return 'הבקשה לקחה יותר מדי זמן';
+        }
+        return error.message || 'שגיאה לא ידועה';
+    }
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
     async getStatus() {
-        return this.call('/api/status');
+        return this.call('/api/status', 'GET', null, { cache: true });
     }
     async getRecentMemories(limit = 50) {
-        return this.call(`/api/memories/recent?limit=${limit}`);
+        return this.call(`/api/memories/recent?limit=${limit}`, 'GET', null, { cache: true });
     }
     async searchMemories(type, limit = 50) {
-        return this.call(`/api/memories/search?type=${type}&limit=${limit}`);
+        return this.call(`/api/memories/search?type=${type}&limit=${limit}`, 'GET', null, { cache: true });
     }
     async getMemoryStats() {
-        return this.call('/api/memories/stats');
+        return this.call('/api/memories/stats', 'GET', null, { cache: true });
     }
     async addMemory(type, content) {
         return this.call('/api/memories/add', 'POST', { type, content });
@@ -172,6 +295,10 @@ class StatusManager {
     }
 }
 class MemoryManager {
+    constructor() {
+        this.lastMemories = [];
+        this.renderScheduled = false;
+    }
     async load() {
         try {
             let memories;
@@ -183,12 +310,36 @@ class MemoryManager {
             }
             // Update memory count
             this.updateElement('memoryCount', memories.length.toString());
-            // Render memories
-            this.render(memories);
+            // Only re-render if data changed
+            if (this.hasChanged(memories)) {
+                this.lastMemories = memories;
+                this.scheduleRender(memories);
+            }
         }
         catch (error) {
             console.error('Failed to load memories:', error);
         }
+    }
+    hasChanged(newMemories) {
+        if (newMemories.length !== this.lastMemories.length) {
+            return true;
+        }
+        // Quick check: compare last item
+        if (newMemories.length > 0 && this.lastMemories.length > 0) {
+            const lastNew = newMemories[newMemories.length - 1];
+            const lastOld = this.lastMemories[this.lastMemories.length - 1];
+            return lastNew.id !== lastOld.id || lastNew.content !== lastOld.content;
+        }
+        return false;
+    }
+    scheduleRender(memories) {
+        if (this.renderScheduled)
+            return;
+        this.renderScheduled = true;
+        requestAnimationFrame(() => {
+            this.render(memories);
+            this.renderScheduled = false;
+        });
     }
     render(memories) {
         const memoriesList = document.getElementById('memoriesList');
@@ -198,11 +349,14 @@ class MemoryManager {
             memoriesList.innerHTML = '<div class="loading">אין זיכרונות</div>';
             return;
         }
-        memoriesList.innerHTML = '';
-        memories.reverse().forEach(memory => {
+        // Use DocumentFragment for better performance
+        const fragment = document.createDocumentFragment();
+        memories.slice().reverse().forEach(memory => {
             const item = this.createMemoryItem(memory);
-            memoriesList.appendChild(item);
+            fragment.appendChild(item);
         });
+        memoriesList.innerHTML = '';
+        memoriesList.appendChild(fragment);
     }
     createMemoryItem(memory) {
         const div = document.createElement('div');
@@ -488,30 +642,67 @@ class EventHandlers {
                 button.classList.remove('active');
             }
         });
-        // Reload memories
-        new MemoryManager().load();
+        // Reload memories with debounce
+        this.debouncedLoadMemories();
     }
 }
+EventHandlers.debouncedLoadMemories = debounce(() => {
+    new MemoryManager().load();
+}, 300);
 // ==================== AUTO REFRESH ====================
 class AutoRefresh {
     static start() {
-        const interval = setInterval(async () => {
-            // Only refresh if page is visible (performance optimization)
-            if (!document.hidden) {
-                await new StatusManager().update();
-                // Only load memories and stats if agent is running
-                if (state.isAgentRunning) {
-                    await new MemoryManager().load();
-                    await new StatsManager().load();
-                }
-            }
-        }, 10000); // Every 10 seconds - optimized for better performance
+        this.scheduleNext();
+    }
+    static scheduleNext() {
+        const interval = setTimeout(async () => {
+            await this.refresh();
+            this.scheduleNext();
+        }, this.currentInterval);
         state.setRefreshInterval(interval);
+    }
+    static async refresh() {
+        // Skip if page is hidden or user is inactive
+        if (document.hidden || !state.isActive()) {
+            return;
+        }
+        // Skip if offline
+        if (!state.isOnline) {
+            this.increaseInterval();
+            return;
+        }
+        try {
+            await new StatusManager().update();
+            // Only load memories and stats if agent is running
+            if (state.isAgentRunning) {
+                await Promise.all([
+                    new MemoryManager().load(),
+                    new StatsManager().load()
+                ]);
+            }
+            // Success - reset error count and interval
+            state.resetErrors();
+            this.currentInterval = this.baseInterval;
+        }
+        catch (error) {
+            console.error('Auto-refresh error:', error);
+            state.incrementErrors();
+            // Exponential backoff on consecutive errors
+            if (state.consecutiveErrors >= 3) {
+                this.increaseInterval();
+            }
+        }
+    }
+    static increaseInterval() {
+        this.currentInterval = Math.min(this.currentInterval * 1.5, this.maxInterval);
     }
     static stop() {
         state.clearRefreshInterval();
     }
 }
+AutoRefresh.baseInterval = 10000; // 10 seconds
+AutoRefresh.maxInterval = 60000; // 60 seconds
+AutoRefresh.currentInterval = AutoRefresh.baseInterval;
 // ==================== INITIALIZATION ====================
 function initializeEventListeners() {
     // Goal setting
@@ -560,13 +751,48 @@ async function initialize() {
     ToastManager.initialize();
     // Initialize event listeners
     initializeEventListeners();
-    // Load initial data
-    await new StatusManager().update();
-    await new MemoryManager().load();
-    await new StatsManager().load();
+    // Setup network monitoring
+    setupNetworkMonitoring();
+    // Load initial data with error handling
+    try {
+        await Promise.all([
+            new StatusManager().update(),
+            new MemoryManager().load(),
+            new StatsManager().load()
+        ]);
+    }
+    catch (error) {
+        console.error('Failed to load initial data:', error);
+        ToastManager.show('שגיאה בטעינת נתונים ראשוניים', 'error');
+    }
     // Start auto-refresh
     AutoRefresh.start();
     console.log('✅ Dashboard Ready!');
+}
+function setupNetworkMonitoring() {
+    // Monitor online/offline events
+    window.addEventListener('online', () => {
+        state.setOnlineStatus(true);
+        state.resetErrors();
+        ToastManager.show('חיבור אינטרנט חזר', 'success');
+        EventHandlers.refreshAll();
+    });
+    window.addEventListener('offline', () => {
+        state.setOnlineStatus(false);
+        ToastManager.show('אין חיבור לאינטרנט', 'error');
+    });
+    // Monitor visibility changes
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            state.updateActivity();
+        }
+    });
+    // Track user activity
+    const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    const throttledActivity = throttle(() => state.updateActivity(), 5000);
+    activityEvents.forEach(event => {
+        document.addEventListener(event, throttledActivity, { passive: true });
+    });
 }
 // ==================== MAIN ====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -584,4 +810,3 @@ window.addEventListener('error', (e) => {
     console.error('Global error:', e.error);
     ToastManager.show('אירעה שגיאה לא צפויה', 'error');
 });
-//# sourceMappingURL=app.js.map
